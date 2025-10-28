@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.env/
+
+# SQLite database file
+*.db
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
+
+# Node.js
+node_modules/
+dist/
+package-lock.json
+
+# Others
+.DS_Store
