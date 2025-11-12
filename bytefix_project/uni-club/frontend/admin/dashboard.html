@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Yönetim Paneli</title>
+  </head>
+  <body>
+    <h1>Yönetim Paneli</h1>
+    <nav>
+      <a href="./login.html" onclick="localStorage.removeItem('token')"
+        >Çıkış</a
+      >
+    </nav>
+
+    <label>Kulüp ID: <input id="clubId" type="number" /></label>
+    <button onclick="loadClub()">Kulüp Bilgisi Getir</button>
+    <pre id="clubInfo"></pre>
+
+    <h2>Kulüp Bilgisi Güncelle</h2>
+    <input id="clubName" placeholder="Kulüp adı" />
+    <textarea id="clubDesc" placeholder="Açıklama"></textarea>
+    <button onclick="saveClub()">Kaydet</button>
+
+    <h2>Etkinlik Oluştur</h2>
+    <input id="evTitle" placeholder="Başlık" />
+    <input id="evLocation" placeholder="Yer" />
+    <input id="evStart" type="datetime-local" />
+    <input id="evEnd" type="datetime-local" />
+    <textarea id="evDesc" placeholder="Açıklama"></textarea>
+    <button onclick="createEvent()">Oluştur</button>
+
+    <h2>Etkinlikler</h2>
+    <button onclick="loadEvents()">Listele</button>
+    <ul id="evList"></ul>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
