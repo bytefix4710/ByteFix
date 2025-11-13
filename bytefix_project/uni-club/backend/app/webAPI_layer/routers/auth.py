@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.data_access_layer.db import SessionLocal
 from app.data_access_layer import models
-from app.webAPI_layer.schemas import UserRegister, UserPublic, Token
-from app.business_logic_layer.services.auth_service import hash_password, verify_password, create_access_token
+from app.webAPI_layer.schemas import ClubAdminRegister, ClubAdminPublic, Token
+from app.business_logic_layer.services.auth_service import (
+    hash_password,
+    verify_password,
+    create_access_token,
+)
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/club-admin", tags=["club-admin"])
+
 
 def get_db():
     db = SessionLocal()
@@ -14,28 +20,34 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/register", response_model=UserPublic)
-def register(payload: UserRegister, db: Session = Depends(get_db)):
-    if db.query(models.User).filter_by(email=payload.email).first():
-        raise HTTPException(status_code=400, detail="Email zaten kayıtlı")
-    user = models.User(
-        email=payload.email,
-        full_name=payload.full_name,
-        password_hash=hash_password(payload.password)
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
 
-class LoginReq(UserRegister):
-    pass
+@router.post("/register", response_model=ClubAdminPublic)
+def register_admin(payload: ClubAdminRegister, db: Session = Depends(get_db)):
+    existing = db.query(models.ClubAdmin).filter_by(email=payload.email).first()
+    if existing:
+        raise HTTPException(
+            status_code=400, detail="Bu e-posta ile kayıtlı admin zaten var."
+        )
+
+    admin = models.ClubAdmin(
+        email=payload.email,
+        password_hash=hash_password(payload.password),
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    return admin
+
 
 @router.post("/login", response_model=Token)
-def login(payload: LoginReq, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter_by(email=payload.email).first()
-    if not user or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Geçersiz bilgiler")
-    admin_clubs = [m.club_id for m in user.memberships if m.role.value == "admin"]
-    token = create_access_token({"sub": str(user.id), "admin_clubs": admin_clubs})
+def login_admin(payload: ClubAdminRegister, db: Session = Depends(get_db)):
+    admin = db.query(models.ClubAdmin).filter_by(email=payload.email).first()
+    if not admin or not verify_password(payload.password, admin.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Geçersiz e-posta veya şifre",
+        )
+
+    # Token içine hesap_id koyuyoruz
+    token = create_access_token({"sub": str(admin.hesap_id)})
     return {"access_token": token, "token_type": "bearer"}

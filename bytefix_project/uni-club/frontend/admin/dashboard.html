@@ -2,36 +2,49 @@
 <html lang="tr">
   <head>
     <meta charset="utf-8" />
-    <title>Yönetim Paneli</title>
+    <title>Kulüp Yöneticisi Paneli</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 2rem auto;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+      button {
+        padding: 0.4rem 0.8rem;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      .label {
+        font-weight: bold;
+      }
+      a {
+        color: #0077cc;
+        text-decoration: none;
+      }
+    </style>
   </head>
   <body>
-    <h1>Yönetim Paneli</h1>
-    <nav>
-      <a href="./login.html" onclick="localStorage.removeItem('token')"
-        >Çıkış</a
-      >
-    </nav>
+    <header>
+      <h1>Yönetici Paneli</h1>
+      <div>
+        <span id="adminEmail"></span>
+        <button onclick="logout()">Çıkış</button>
+      </div>
+    </header>
 
-    <label>Kulüp ID: <input id="clubId" type="number" /></label>
-    <button onclick="loadClub()">Kulüp Bilgisi Getir</button>
-    <pre id="clubInfo"></pre>
+    <div id="clubInfo" class="card">Kulüp bilgileri yükleniyor...</div>
 
-    <h2>Kulüp Bilgisi Güncelle</h2>
-    <input id="clubName" placeholder="Kulüp adı" />
-    <textarea id="clubDesc" placeholder="Açıklama"></textarea>
-    <button onclick="saveClub()">Kaydet</button>
-
-    <h2>Etkinlik Oluştur</h2>
-    <input id="evTitle" placeholder="Başlık" />
-    <input id="evLocation" placeholder="Yer" />
-    <input id="evStart" type="datetime-local" />
-    <input id="evEnd" type="datetime-local" />
-    <textarea id="evDesc" placeholder="Açıklama"></textarea>
-    <button onclick="createEvent()">Oluştur</button>
-
-    <h2>Etkinlikler</h2>
-    <button onclick="loadEvents()">Listele</button>
-    <ul id="evList"></ul>
+    <p><a href="../index.html">← Ana sayfaya dön</a></p>
 
     <script src="admin.js"></script>
   </body>

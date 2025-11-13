@@ -1,38 +1,44 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.data_access_layer.db import SessionLocal
+
 from app.data_access_layer import models
-from app.webAPI_layer.deps import get_current_user, require_admin_of_club, oauth2_scheme
+from app.webAPI_layer.deps import get_db, get_current_admin
+from app.webAPI_layer.schemas import ClubPublic
 
-router = APIRouter(prefix="/clubs", tags=["clubs"])
+router = APIRouter(tags=["clubs"])
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@router.get("/{club_id}")
-def get_club(club_id: int, db: Session = Depends(get_db)):
-    club = db.query(models.Club).get(club_id)
-    if not club:
-        raise HTTPException(404, "Kulüp yok")
-    return {"id": club.id, "name": club.name, "description": club.description}
+@router.get("/gelistirme")
+def get_gelistirme():
+    # Artık ayrı bir Gelistirme tablosu yok, sabit mesaj döndürüyoruz
+    return {"description": "Bu site geliştirme aşamasındadır."}
 
-@router.put("/{club_id}")
-def update_club(
-    club_id: int,
-    payload: dict,
-    db: Session = Depends(get_db),
-    _user = Depends(get_current_user),
-    token: str = Depends(oauth2_scheme),
+
+@router.get("/clubs/me", response_model=ClubPublic)
+def get_my_club(
+    admin=Depends(get_current_admin),
+    database: Session = Depends(get_db),
 ):
-    require_admin_of_club(club_id, token)
-    club = db.query(models.Club).get(club_id)
+    """
+    Token içindeki hesap_id (sub) ile, club tablosundaki admin sütunu
+    eşleşen kulübü getirir.
+    """
+    club = (
+        database.query(models.Club)
+        .filter(models.Club.admin_id == admin.hesap_id)
+        .first()
+    )
     if not club:
-        raise HTTPException(404, "Kulüp yok")
-    club.name = payload.get("name", club.name)
-    club.description = payload.get("description", club.description)
-    db.commit()
-    return {"ok": True}
+        raise HTTPException(
+            status_code=404, detail="Bu admin'e ait kayıtlı kulüp bulunamadı."
+        )
+
+    # ClubPublic şemasına map edelim
+    return ClubPublic(
+        id=club.kulup_id,
+        name=club.name,
+        description=club.description,
+        email=club.email,
+        phone=club.phone,
+        admin_id=club.admin_id,
+    )

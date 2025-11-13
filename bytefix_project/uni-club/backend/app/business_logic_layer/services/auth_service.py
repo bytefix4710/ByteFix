@@ -3,21 +3,27 @@ from datetime import datetime, timedelta
 from jose import jwt
 from typing import Optional
 
+# bcrypt yerine pbkdf2_sha256 kullanıyoruz (Windows + py3.12 için daha sorunsuz)
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
-# PROD'da .env'den okuyun
+# PROD'da .env'den okunmalı
 JWT_SECRET = "change_me_in_prod"
 JWT_ALG = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8
 
+
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
+
 
 def verify_password(password: str, password_hash: str) -> bool:
     return pwd_context.verify(password, password_hash)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALG)

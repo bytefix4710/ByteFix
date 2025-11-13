@@ -1,148 +1,148 @@
 const API = "http://127.0.0.1:8000";
+const TOKEN_KEY = "clubAdminToken";
 
-// ------- ortak -------
-function token() {
-  return localStorage.getItem("token");
+// ------- ortak yardımcılar -------
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
 }
+
 function setToken(t) {
-  localStorage.setItem("token", t);
-}
-function authHeader() {
-  return { Authorization: "Bearer " + token() };
-}
-function jh(h = {}) {
-  return { "Content-Type": "application/json", ...h };
+  localStorage.setItem(TOKEN_KEY, t);
 }
 
-// ------- login -------
+function authHeader() {
+  const t = getToken();
+  return t ? { Authorization: "Bearer " + t } : {};
+}
+
+function logout() {
+  localStorage.removeItem(TOKEN_KEY);
+  window.location.href = "login.html";
+}
+window.logout = logout;
+
+// ------- LOGIN SAYFASI -------
+
 const loginForm = document.getElementById("loginForm");
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
+
+    const msg = document.getElementById("msg");
+    if (msg) msg.textContent = "";
+
     try {
-      const res = await fetch(`${API}/auth/login`, {
+      const res = await fetch(`${API}/club-admin/login`, {
         method: "POST",
-        headers: jh(),
-        body: JSON.stringify({ email, password, full_name: "x" }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) throw new Error("Giriş başarısız");
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Giriş başarısız.");
+      }
+
       const data = await res.json();
       setToken(data.access_token);
-      window.location.href = "./dashboard.html";
+      window.location.href = "dashboard.html";
     } catch (err) {
-      document.getElementById("msg").textContent = err.message;
+      console.error(err);
+      if (msg) msg.textContent = err.message;
     }
   });
 }
 
-// ------- register -------
-const regForm = document.getElementById("regForm");
-if (regForm) {
-  regForm.addEventListener("submit", async (e) => {
+// ------- REGISTER SAYFASI (kullanıyorsan) -------
+
+const registerForm = document.getElementById("registerForm");
+if (registerForm) {
+  registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const full_name = document.getElementById("full_name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+
+    const msg = document.getElementById("msg");
+    if (msg) msg.textContent = "";
+
     try {
-      const res = await fetch(`${API}/auth/register`, {
+      const res = await fetch(`${API}/club-admin/register`, {
         method: "POST",
-        headers: jh(),
-        body: JSON.stringify({ email, full_name, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
+
       if (!res.ok) {
-        throw new Error("Kayıt başarısız");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Kayıt başarısız.");
       }
-      window.location.href = "./login.html";
+
+      if (msg)
+        msg.textContent = "Kayıt başarılı, giriş ekranına yönlendiriliyorsun.";
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 1200);
     } catch (err) {
-      document.getElementById("msg").textContent = err.message;
+      console.error(err);
+      if (msg) msg.textContent = err.message;
     }
   });
 }
 
-// ------- dashboard actions -------
-async function loadClub() {
-  const clubId = document.getElementById("clubId").value;
-  const res = await fetch(`${API}/clubs/${clubId}`);
-  const data = await res.json();
-  document.getElementById("clubInfo").textContent = JSON.stringify(
-    data,
-    null,
-    2
-  );
-  document.getElementById("clubName").value = data.name || "";
-  document.getElementById("clubDesc").value = data.description || "";
-}
-window.loadClub = loadClub;
+// ------- DASHBOARD SAYFASI -------
 
-async function saveClub() {
-  const clubId = document.getElementById("clubId").value;
-  const body = {
-    name: document.getElementById("clubName").value,
-    description: document.getElementById("clubDesc").value,
-  };
-  const res = await fetch(`${API}/clubs/${clubId}`, {
-    method: "PUT",
-    headers: jh(authHeader()),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    alert("Yetki hatası veya istek hatası");
-    return;
-  }
-  await loadClub();
-}
-window.saveClub = saveClub;
+const clubInfoDiv = document.getElementById("clubInfo");
+if (clubInfoDiv) {
+  (async () => {
+    const token = getToken();
+    if (!token) {
+      // login yoksa login sayfasına
+      window.location.href = "login.html";
+      return;
+    }
 
-async function createEvent() {
-  const clubId = parseInt(document.getElementById("clubId").value, 10);
-  const body = {
-    club_id: clubId,
-    title: document.getElementById("evTitle").value,
-    description: document.getElementById("evDesc").value,
-    location: document.getElementById("evLocation").value,
-    start_time: new Date(
-      document.getElementById("evStart").value
-    ).toISOString(),
-    end_time: new Date(document.getElementById("evEnd").value).toISOString(),
-  };
-  const res = await fetch(`${API}/events`, {
-    method: "POST",
-    headers: jh(authHeader()),
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    alert("Yetkisiz veya hata");
-    return;
-  }
-  await loadEvents();
-}
-window.createEvent = createEvent;
-
-async function loadEvents() {
-  const clubId = document.getElementById("clubId").value;
-  const res = await fetch(`${API}/events/${clubId}`);
-  const data = await res.json();
-  const ul = document.getElementById("evList");
-  ul.innerHTML = "";
-  data.forEach((ev) => {
-    const li = document.createElement("li");
-    li.textContent = `${ev.title} @ ${ev.location} (${new Date(
-      ev.start_time
-    ).toLocaleString()}) `;
-    const del = document.createElement("button");
-    del.textContent = "Sil";
-    del.onclick = async () => {
-      const r = await fetch(`${API}/events/${ev.id}`, {
-        method: "DELETE",
-        headers: authHeader(),
+    try {
+      const res = await fetch(`${API}/clubs/me`, {
+        headers: { ...authHeader() },
       });
-      if (r.ok) li.remove();
-      else alert("Silinemedi");
-    };
-    li.appendChild(del);
-    ul.appendChild(li);
-  });
+
+      if (res.status === 401) {
+        // token bozuk/expired
+        logout();
+        return;
+      }
+
+      if (res.status === 404) {
+        clubInfoDiv.textContent =
+          "Bu admin hesabına bağlı kulüp bulunamadı. (Önce backend'den ilişkilendirmen gerekiyor.)";
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("Kulüp bilgisi alınamadı.");
+      }
+
+      const club = await res.json();
+
+      clubInfoDiv.innerHTML = `
+        <h2>Kulübüm</h2>
+        <p><span class="label">Kulüp ID:</span> ${club.id}</p>
+        <p><span class="label">Ad:</span> ${club.name}</p>
+        <p><span class="label">Açıklama:</span> ${club.description || "-"}</p>
+        <p><span class="label">E-posta:</span> ${club.email || "-"}</p>
+        <p><span class="label">Telefon:</span> ${club.phone || "-"}</p>
+      `;
+
+      const adminEmailSpan = document.getElementById("adminEmail");
+      if (adminEmailSpan) {
+        adminEmailSpan.textContent = "(Giriş yapıldı)";
+      }
+    } catch (err) {
+      console.error(err);
+      clubInfoDiv.textContent = "Bir hata oluştu, kulüp bilgisi yüklenemedi.";
+    }
+  })();
 }
-window.loadEvents = loadEvents;

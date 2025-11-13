@@ -28,16 +28,26 @@
         padding: 0.5rem;
         border-radius: 4px;
       }
+
+      .top-links {
+        margin-bottom: 1rem;
+      }
+      .top-links a {
+        margin-right: 1rem;
+        text-decoration: none;
+        color: #0077cc;
+      }
     </style>
   </head>
   <body>
     <h1>Üniversite Kulüpleri</h1>
-    <!-- <h2>Site Durumu</h2> -->
-    <p id="gelistirme">Yükleniyor...</p>
 
-    <!-- <input type="text" id="clubName" placeholder="Kulüp adı" />
-    <input type="text" id="clubDesc" placeholder="Açıklama (opsiyonel)" />
-    <button id="addClub">Kulüp Ekle</button> -->
+    <div class="top-links">
+      <a href="admin/login.html">Kulüp Yöneticisi Girişi</a>
+      <a href="admin/register.html">Kulüp Yöneticisi Kayıt</a>
+    </div>
+
+    <p id="gelistirme">Yükleniyor...</p>
 
     <ul id="club-list"></ul>
 

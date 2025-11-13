@@ -1,64 +1,138 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, Enum, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from .db import Base
-import enum
 
-class Club(Base):
-    __tablename__ = "clubs"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, nullable=False)
-    description = Column(String, nullable=True)
 
-    # yeni: kulüp-üyelik ilişkisi
-    memberships = relationship("Membership", back_populates="club", cascade="all, delete-orphan")
-
+# =============== MEMBER TABLOSU ===============
+# member:
+#   ogrenci_no (PK), ad, soyad, eposta, sifre
 class Member(Base):
-    __tablename__ = "members"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    club_id = Column(Integer, ForeignKey("clubs.id"))
-    club = relationship("Club")
+    __tablename__ = "member"
 
-class Gelistirme(Base):
-    __tablename__ = "gelistirme_asamasi"
-    id = Column(Integer, primary_key=True)
-    description = Column(String, nullable=True)
+    ogrenci_no = Column("ogrenci_no", String(20), primary_key=True, index=True)
+    first_name = Column("ad", String(100), nullable=False)
+    last_name = Column("soyad", String(100), nullable=False)
+    email = Column("eposta", String(255), unique=True, nullable=False, index=True)
+    password_hash = Column("sifre", String(255), nullable=False)
 
-# === YENİ: Kimlik ve Roller ===
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    full_name = Column(String(120), nullable=False)
-    is_active = Column(Boolean, default=True)
+    memberships = relationship(
+        "Membership",
+        back_populates="member",
+        cascade="all, delete-orphan",
+    )
+    event_regs = relationship(
+        "EventReg",
+        back_populates="member",
+        cascade="all, delete-orphan",
+    )
 
-    memberships = relationship("Membership", back_populates="user", cascade="all, delete-orphan")
 
-class RoleEnum(str, enum.Enum):
-    admin = "admin"
-    member = "member"
+# =============== CLUB_ADMIN TABLOSU ===============
+# club_admin:
+#   hesapId (PK), eposta, sifre
+class ClubAdmin(Base):
+    __tablename__ = "club_admin"
 
+    hesap_id = Column("hesapId", Integer, primary_key=True, index=True, autoincrement=True)
+    email = Column("eposta", String(255), unique=True, nullable=False, index=True)
+    password_hash = Column("sifre", String(255), nullable=False)
+
+    clubs = relationship("Club", back_populates="admin_user")
+
+
+# =============== SUPER_ADMIN TABLOSU ===============
+# super_admin:
+#   eposta (PK), sifre
+class SuperAdmin(Base):
+    __tablename__ = "super_admin"
+
+    email = Column("eposta", String(255), primary_key=True, index=True)
+    password_hash = Column("sifre", String(255), nullable=False)
+
+
+# =============== CLUB TABLOSU ===============
+# club:
+#   kulupId (PK), ad, admin (FK -> club_admin.hesapId),
+#   email, telefon, açıklama
+class Club(Base):
+    __tablename__ = "club"
+
+    kulup_id = Column("kulupId", Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column("ad", String(150), nullable=False)
+    admin_id = Column("admin", Integer, ForeignKey("club_admin.hesapId"), nullable=True)
+    email = Column("email", String(255), nullable=True)
+    phone = Column("telefon", String(50), nullable=True)
+    description = Column("aciklama", String(500), nullable=True)
+
+    admin_user = relationship("ClubAdmin", back_populates="clubs")
+
+    memberships = relationship(
+        "Membership",
+        back_populates="club",
+        cascade="all, delete-orphan",
+    )
+    events = relationship(
+        "Event",
+        back_populates="club",
+        cascade="all, delete-orphan",
+    )
+
+
+# =============== MEMBERSHIP TABLOSU ===============
+# membership:
+#   uyelikId (PK), kulupId (FK -> club.kulupId),
+#   ogrenciId (FK -> member.ogrenci_no)
 class Membership(Base):
-    __tablename__ = "memberships"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    club_id = Column(Integer, ForeignKey("clubs.id"), nullable=False)
-    role = Column(Enum(RoleEnum), default=RoleEnum.member, nullable=False)
+    __tablename__ = "membership"
 
-    user = relationship("User", back_populates="memberships")
+    uyelik_id = Column("uyelikId", Integer, primary_key=True, index=True, autoincrement=True)
+    kulup_id = Column("kulupId", Integer, ForeignKey("club.kulupId"), nullable=False)
+    ogrenci_id = Column(
+        "ogrenciId",
+        String(20),
+        ForeignKey("member.ogrenci_no"),
+        nullable=False,
+    )
+
     club = relationship("Club", back_populates="memberships")
+    member = relationship("Member", back_populates="memberships")
 
-# === YENİ: Etkinlikler ===
+
+# =============== EVENT TABLOSU ===============
+# event:
+#   etkinlikId (PK), kulupId (FK -> club.kulupId),
+#   ad, tarih
 class Event(Base):
-    __tablename__ = "events"
-    id = Column(Integer, primary_key=True)
-    club_id = Column(Integer, ForeignKey("clubs.id"), nullable=False)
-    title = Column(String(200), nullable=False)
-    description = Column(Text, default="")
-    location = Column(String(200), default="")
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
-    is_published = Column(Boolean, default=False)
+    __tablename__ = "event"
 
-    club = relationship("Club")
+    etkinlik_id = Column("etkinlikId", Integer, primary_key=True, index=True, autoincrement=True)
+    kulup_id = Column("kulupId", Integer, ForeignKey("club.kulupId"), nullable=False)
+    name = Column("ad", String(200), nullable=False)
+    datetime = Column("tarih", DateTime, nullable=False)
+
+    club = relationship("Club", back_populates="events")
+    registrations = relationship(
+        "EventReg",
+        back_populates="event",
+        cascade="all, delete-orphan",
+    )
+
+
+# =============== EVENT_REG TABLOSU ===============
+# event_reg:
+#   kayitId (PK), etkinlikId (FK -> event.etkinlikId),
+#   ogrenciId (FK -> member.ogrenci_no)
+class EventReg(Base):
+    __tablename__ = "event_reg"
+
+    kayit_id = Column("kayitId", Integer, primary_key=True, index=True, autoincrement=True)
+    etkinlik_id = Column("etkinlikId", Integer, ForeignKey("event.etkinlikId"), nullable=False)
+    ogrenci_id = Column(
+        "ogrenciId",
+        String(20),
+        ForeignKey("member.ogrenci_no"),
+        nullable=False,
+    )
+
+    event = relationship("Event", back_populates="registrations")
+    member = relationship("Member", back_populates="event_regs")
