@@ -30,3 +30,11 @@ class ClubPublic(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class ClubUpdate(BaseModel):
+    # Güncelleme isteğinde gönderilecek alanlar
+    name: Optional[str] = None
+    description: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
