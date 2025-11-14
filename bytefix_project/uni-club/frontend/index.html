@@ -3,54 +3,198 @@
   <head>
     <meta charset="UTF-8" />
     <title>UniClub</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 600px;
-        margin: 2rem auto;
-      }
-      input {
-        margin: 0.5rem 0;
-        padding: 0.5rem;
-        width: 100%;
-      }
-      button {
-        padding: 0.5rem 1rem;
-        margin-bottom: 1rem;
-      }
-      ul {
-        list-style-type: none;
-        padding: 0;
-      }
-      li {
-        background: #f0f0f0;
-        margin-bottom: 0.5rem;
-        padding: 0.5rem;
-        border-radius: 4px;
-      }
-
-      .top-links {
-        margin-bottom: 1rem;
-      }
-      .top-links a {
-        margin-right: 1rem;
-        text-decoration: none;
-        color: #0077cc;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Üniversite Kulüpleri</h1>
+    <div class="page-root">
+      <div class="app-shell">
+        <header class="app-header">
+          <div class="app-title-block">
+            <div class="app-title">
+              UniClub
+              <span class="app-title-badge">Giriş</span>
+            </div>
+            <div class="app-subtitle">
+              Devam etmeden önce kullanıcı tipini seç.
+            </div>
+          </div>
+        </header>
 
-    <div class="top-links">
-      <a href="admin/login.html">Kulüp Yöneticisi Girişi</a>
-      <a href="admin/register.html">Kulüp Yöneticisi Kayıt</a>
+        <main
+          class="app-main"
+          style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px"
+        >
+          <!-- KULÜP ADMİNİ -->
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Kulüp Admini</div>
+                <div class="card-subtitle">
+                  Kulüp bilgilerini ve etkinlikleri yöneten kullanıcı.
+                </div>
+              </div>
+              <span class="chip">Aktif</span>
+            </div>
+
+            <ul
+              style="
+                padding-left: 16px;
+                margin: 8px 0 14px;
+                font-size: 12px;
+                color: var(--text-muted);
+              "
+            >
+              <li>• Kulüp profilini düzenler.</li>
+              <li>• Etkinlikleri oluşturur ve yönetir. (yakında)</li>
+              <li>• Üyelikleri görüntüler. (yakında)</li>
+            </ul>
+
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 6px;
+              "
+            >
+              <button
+                class="button-primary"
+                style="justify-content: center; width: 100%"
+                onclick="window.location.href='admin/login.html'"
+              >
+                Giriş Yap
+              </button>
+              <button
+                class="button-ghost"
+                style="justify-content: center; width: 100%"
+                onclick="window.location.href='admin/register.html'"
+              >
+                Kayıt Ol
+              </button>
+            </div>
+          </section>
+
+          <!-- SÜPER ADMİN -->
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Süper Admin</div>
+                <div class="card-subtitle">
+                  Sistem genelini yöneten, tüm kulüpleri gören kullanıcı.
+                </div>
+              </div>
+              <span class="chip">Yakında</span>
+            </div>
+
+            <ul
+              style="
+                padding-left: 16px;
+                margin: 8px 0 14px;
+                font-size: 12px;
+                color: var(--text-muted);
+              "
+            >
+              <li>• Tüm kulüpleri görüntüler.</li>
+              <li>• Kulüp adminlerini yönetir.</li>
+              <li>• Sistem ayarlarını düzenler.</li>
+            </ul>
+
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 6px;
+              "
+            >
+              <button
+                class="button-ghost"
+                style="
+                  justify-content: center;
+                  width: 100%;
+                  opacity: 0.6;
+                  cursor: not-allowed;
+                "
+                onclick="alert('Süper admin paneli geliştirme aşamasında.')"
+              >
+                Giriş Yap
+              </button>
+              <button
+                class="button-ghost"
+                style="
+                  justify-content: center;
+                  width: 100%;
+                  opacity: 0.6;
+                  cursor: not-allowed;
+                "
+                onclick="alert('Süper admin kayıt ekranı geliştirme aşamasında.')"
+              >
+                Kayıt Ol
+              </button>
+            </div>
+          </section>
+
+          <!-- ÜYE -->
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Üye</div>
+                <div class="card-subtitle">
+                  Kulüplere katılan ve etkinliklere kaydolan öğrenci.
+                </div>
+              </div>
+              <span class="chip">Yakında</span>
+            </div>
+
+            <ul
+              style="
+                padding-left: 16px;
+                margin: 8px 0 14px;
+                font-size: 12px;
+                color: var(--text-muted);
+              "
+            >
+              <li>• Kulüpleri görüntüler ve başvurur.</li>
+              <li>• Etkinliklere kayıt olur.</li>
+              <li>• Kendi profilini yönetir.</li>
+            </ul>
+
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 6px;
+              "
+            >
+              <button
+                class="button-ghost"
+                style="
+                  justify-content: center;
+                  width: 100%;
+                  opacity: 0.6;
+                  cursor: not-allowed;
+                "
+                onclick="alert('Üye girişi geliştirme aşamasında.')"
+              >
+                Giriş Yap
+              </button>
+              <button
+                class="button-ghost"
+                style="
+                  justify-content: center;
+                  width: 100%;
+                  opacity: 0.6;
+                  cursor: not-allowed;
+                "
+                onclick="alert('Üye kayıt ekranı geliştirme aşamasında.')"
+              >
+                Kayıt Ol
+              </button>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
-
-    <p id="gelistirme">Yükleniyor...</p>
-
-    <ul id="club-list"></ul>
-
-    <script src="app.js"></script>
   </body>
 </html>

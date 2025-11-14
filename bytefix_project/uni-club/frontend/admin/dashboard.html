@@ -3,48 +3,101 @@
   <head>
     <meta charset="utf-8" />
     <title>Kulüp Yöneticisi Paneli</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 600px;
-        margin: 2rem auto;
-      }
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-      button {
-        padding: 0.4rem 0.8rem;
-      }
-      .card {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-      }
-      .label {
-        font-weight: bold;
-      }
-      a {
-        color: #0077cc;
-        text-decoration: none;
-      }
-    </style>
+    <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
-    <header>
-      <h1>Yönetici Paneli</h1>
-      <div>
-        <span id="adminEmail"></span>
-        <button onclick="logout()">Çıkış</button>
+    <div class="page-root">
+      <div class="app-shell">
+        <header class="app-header">
+          <div class="app-title-block">
+            <div class="app-title">
+              UniClub
+              <span class="app-title-badge">Admin Panel</span>
+            </div>
+            <div class="app-subtitle">
+              Kulübünün bilgilerini buradan görüntüle ve güncelle.
+            </div>
+          </div>
+          <nav class="app-nav">
+            <button
+              class="button-ghost"
+              onclick="window.location.href='../index.html'"
+            >
+              Ana Sayfa
+            </button>
+            <button class="button-primary" onclick="logout()">Çıkış</button>
+          </nav>
+        </header>
+
+        <main class="dashboard-columns">
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Kulüp Özeti</div>
+                <div class="card-subtitle">
+                  Veri, giriş yaptığın kulüp admini hesabına göre gösterilir.
+                </div>
+              </div>
+              <span class="chip" id="adminEmail">(Giriş yapılıyor...)</span>
+            </div>
+            <div id="clubInfo">Kulüp bilgileri yükleniyor...</div>
+          </section>
+
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Kulüp Bilgilerini Güncelle</div>
+                <div class="card-subtitle">
+                  Ad, açıklama, e-posta ve telefonu düzenleyebilirsin.
+                </div>
+              </div>
+            </div>
+
+            <form id="clubForm">
+              <label>
+                <span class="label">Kulüp Adı</span>
+                <input type="text" id="clubNameInput" placeholder="Kulüp adı" />
+              </label>
+
+              <label>
+                <span class="label">Açıklama</span>
+                <textarea
+                  id="clubDescInput"
+                  placeholder="Kulüp açıklaması"
+                ></textarea>
+              </label>
+
+              <label>
+                <span class="label">Kulüp E-posta</span>
+                <input
+                  type="email"
+                  id="clubEmailInput"
+                  placeholder="ornek@kulup.com"
+                />
+              </label>
+
+              <label>
+                <span class="label">Telefon</span>
+                <input
+                  type="text"
+                  id="clubPhoneInput"
+                  placeholder="05xx xxx xx xx"
+                />
+              </label>
+
+              <button
+                type="submit"
+                class="button-primary"
+                style="justify-content: center"
+              >
+                Kaydet
+              </button>
+              <div id="statusMsg" class="status-success"></div>
+            </form>
+          </section>
+        </main>
       </div>
-    </header>
-
-    <div id="clubInfo" class="card">Kulüp bilgileri yükleniyor...</div>
-
-    <p><a href="../index.html">← Ana sayfaya dön</a></p>
+    </div>
 
     <script src="admin.js"></script>
   </body>

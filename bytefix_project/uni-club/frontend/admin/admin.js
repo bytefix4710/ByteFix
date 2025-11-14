@@ -95,38 +95,40 @@ if (registerForm) {
 // ------- DASHBOARD SAYFASI -------
 
 const clubInfoDiv = document.getElementById("clubInfo");
-if (clubInfoDiv) {
-  (async () => {
-    const token = getToken();
-    if (!token) {
-      // login yoksa login sayfasına
-      window.location.href = "login.html";
+const clubForm = document.getElementById("clubForm");
+
+async function loadClub() {
+  const token = getToken();
+  if (!token) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/clubs/me`, {
+      headers: { ...authHeader() },
+    });
+
+    if (res.status === 401) {
+      logout();
       return;
     }
 
-    try {
-      const res = await fetch(`${API}/clubs/me`, {
-        headers: { ...authHeader() },
-      });
-
-      if (res.status === 401) {
-        // token bozuk/expired
-        logout();
-        return;
-      }
-
-      if (res.status === 404) {
+    if (res.status === 404) {
+      if (clubInfoDiv) {
         clubInfoDiv.textContent =
           "Bu admin hesabına bağlı kulüp bulunamadı. (Önce backend'den ilişkilendirmen gerekiyor.)";
-        return;
       }
+      return;
+    }
 
-      if (!res.ok) {
-        throw new Error("Kulüp bilgisi alınamadı.");
-      }
+    if (!res.ok) {
+      throw new Error("Kulüp bilgisi alınamadı.");
+    }
 
-      const club = await res.json();
+    const club = await res.json();
 
+    if (clubInfoDiv) {
       clubInfoDiv.innerHTML = `
         <h2>Kulübüm</h2>
         <p><span class="label">Kulüp ID:</span> ${club.id}</p>
@@ -135,14 +137,81 @@ if (clubInfoDiv) {
         <p><span class="label">E-posta:</span> ${club.email || "-"}</p>
         <p><span class="label">Telefon:</span> ${club.phone || "-"}</p>
       `;
+    }
 
-      const adminEmailSpan = document.getElementById("adminEmail");
-      if (adminEmailSpan) {
-        adminEmailSpan.textContent = "(Giriş yapıldı)";
-      }
-    } catch (err) {
-      console.error(err);
+    // Form inputlarını doldur
+    const nameInput = document.getElementById("clubNameInput");
+    const descInput = document.getElementById("clubDescInput");
+    const emailInput = document.getElementById("clubEmailInput");
+    const phoneInput = document.getElementById("clubPhoneInput");
+
+    if (nameInput) nameInput.value = club.name || "";
+    if (descInput) descInput.value = club.description || "";
+    if (emailInput) emailInput.value = club.email || "";
+    if (phoneInput) phoneInput.value = club.phone || "";
+
+    const adminEmailSpan = document.getElementById("adminEmail");
+    if (adminEmailSpan) {
+      adminEmailSpan.textContent = "(Giriş yapıldı)";
+    }
+  } catch (err) {
+    console.error(err);
+    if (clubInfoDiv) {
       clubInfoDiv.textContent = "Bir hata oluştu, kulüp bilgisi yüklenemedi.";
     }
-  })();
+  }
+}
+
+if (clubInfoDiv) {
+  // dashboard sayfasındayız
+  loadClub();
+}
+
+// ------- Kulüp bilgilerini güncelle -------
+
+if (clubForm) {
+  clubForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusMsg = document.getElementById("statusMsg");
+    if (statusMsg) statusMsg.textContent = "";
+
+    const name = document.getElementById("clubNameInput").value.trim();
+    const description = document.getElementById("clubDescInput").value.trim();
+    const email = document.getElementById("clubEmailInput").value.trim();
+    const phone = document.getElementById("clubPhoneInput").value.trim();
+
+    try {
+      const res = await fetch(`${API}/clubs/me`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeader(),
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          email,
+          phone,
+        }),
+      });
+
+      if (res.status === 401) {
+        logout();
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Güncelleme başarısız.");
+      }
+
+      if (statusMsg) statusMsg.textContent = "Başarıyla kaydedildi ✅";
+
+      // Ekrandaki kulüp kartını güncelle
+      await loadClub();
+    } catch (err) {
+      console.error(err);
+      if (statusMsg) statusMsg.textContent = err.message;
+    }
+  });
 }
