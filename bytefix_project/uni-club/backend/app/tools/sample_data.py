@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from app.data_access_layer.db import SessionLocal, engine
 from app.data_access_layer import models
-from app.business_logic_layer.services.auth_service import hash_password
+from app.business_logic_layer.services.club_admin.auth_service import hash_password
 
 
 def reset_and_seed():

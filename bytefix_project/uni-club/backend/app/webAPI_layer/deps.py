@@ -5,34 +5,36 @@ from sqlalchemy.orm import Session
 
 from app.data_access_layer.db import SessionLocal
 from app.data_access_layer import models
-from app.business_logic_layer.services.auth_service import JWT_SECRET, JWT_ALG
+from app.business_logic_layer.services.club_admin.auth_service import JWT_SECRET, JWT_ALG
 
+# Kulüp admini login endpoint’i
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="club-admin/login")
 
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+  db = SessionLocal()
+  try:
+      yield db
+  finally:
+      db.close()
 
 
 def get_current_admin(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
 ) -> models.ClubAdmin:
-    cred_exc = HTTPException(status_code=401, detail="Kimlik doğrulama gerekli")
+  cred_exc = HTTPException(status_code=401, detail="Kimlik doğrulama gerekli")
 
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
-        hesap_id = payload.get("sub")
-        if hesap_id is None:
-            raise cred_exc
-    except JWTError:
-        raise cred_exc
+  try:
+      payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+      hesap_id = payload.get("sub")
+      if hesap_id is None:
+          raise cred_exc
+  except JWTError:
+      raise cred_exc
 
-    admin = db.query(models.ClubAdmin).get(int(hesap_id))
-    if not admin:
-        raise cred_exc
+  admin = db.query(models.ClubAdmin).get(int(hesap_id))
+  if not admin:
+      raise cred_exc
 
-    return admin
+  return admin

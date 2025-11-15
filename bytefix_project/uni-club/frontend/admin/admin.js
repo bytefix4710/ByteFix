@@ -56,7 +56,7 @@ if (loginForm) {
   });
 }
 
-// ------- REGISTER SAYFASI (kullanıyorsan) -------
+// ------- REGISTER SAYFASI-------
 
 const registerForm = document.getElementById("registerForm");
 if (registerForm) {
@@ -105,7 +105,7 @@ async function loadClub() {
   }
 
   try {
-    const res = await fetch(`${API}/clubs/me`, {
+    const res = await fetch(`${API}/club-admin/club/me`, {
       headers: { ...authHeader() },
     });
 
@@ -139,7 +139,6 @@ async function loadClub() {
       `;
     }
 
-    // Form inputlarını doldur
     const nameInput = document.getElementById("clubNameInput");
     const descInput = document.getElementById("clubDescInput");
     const emailInput = document.getElementById("clubEmailInput");
@@ -163,7 +162,6 @@ async function loadClub() {
 }
 
 if (clubInfoDiv) {
-  // dashboard sayfasındayız
   loadClub();
 }
 
@@ -173,7 +171,10 @@ if (clubForm) {
   clubForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const statusMsg = document.getElementById("statusMsg");
-    if (statusMsg) statusMsg.textContent = "";
+    if (statusMsg) {
+      statusMsg.textContent = "";
+      statusMsg.classList.remove("status-error", "status-success");
+    }
 
     const name = document.getElementById("clubNameInput").value.trim();
     const description = document.getElementById("clubDescInput").value.trim();
@@ -181,7 +182,7 @@ if (clubForm) {
     const phone = document.getElementById("clubPhoneInput").value.trim();
 
     try {
-      const res = await fetch(`${API}/clubs/me`, {
+      const res = await fetch(`${API}/club-admin/club/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -205,13 +206,18 @@ if (clubForm) {
         throw new Error(data.detail || "Güncelleme başarısız.");
       }
 
-      if (statusMsg) statusMsg.textContent = "Başarıyla kaydedildi ✅";
+      if (statusMsg) {
+        statusMsg.textContent = "Başarıyla kaydedildi ✅";
+        statusMsg.classList.add("status-success");
+      }
 
-      // Ekrandaki kulüp kartını güncelle
       await loadClub();
     } catch (err) {
       console.error(err);
-      if (statusMsg) statusMsg.textContent = err.message;
+      if (statusMsg) {
+        statusMsg.textContent = err.message;
+        statusMsg.classList.add("status-error");
+      }
     }
   });
 }
