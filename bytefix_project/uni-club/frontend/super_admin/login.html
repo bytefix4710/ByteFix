@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Süper Yönetici Giriş</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="page-root">
+      <div class="app-shell auth-layout">
+        <header class="app-header" style="margin-bottom: 14px">
+          <div class="app-title-block">
+            <div class="app-title">
+              UniClub
+              <span class="app-title-badge">Süper Admin</span>
+            </div>
+            <div class="app-subtitle">
+              Sistem yönetim paneline giriş yap.
+            </div>
+          </div>
+          <nav class="app-nav">
+            <a href="../index.html" class="button-ghost">Ana Sayfa</a>
+          </nav>
+        </header>
+
+        <main>
+          <h2 class="auth-title">Süper Yönetici Girişi</h2>
+          <p class="auth-subtitle">
+            Süper admin hesabın ile giriş yaparak tüm kulüpleri yönetebilirsin.
+          </p>
+
+          <div class="card">
+            <form id="loginForm">
+              <label>
+                <span class="label">E-posta</span>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="super@uniclub.test"
+                  required
+                />
+              </label>
+
+              <label>
+                <span class="label">Şifre</span>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="••••••••"
+                  required
+                />
+              </label>
+
+              <button
+                type="submit"
+                class="button-primary"
+                style="justify-content: center; margin-top: 4px"
+              >
+                Giriş Yap
+              </button>
+              <p id="msg" class="status-error"></p>
+            </form>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="super_admin.js"></script>
+  </body>
+</html>
+
