@@ -2,20 +2,21 @@
 <html lang="tr">
   <head>
     <meta charset="utf-8" />
-    <title>Kulüp Yöneticisi Paneli</title>
+    <title>Kulüp Admin Paneli | UniClub</title>
     <link rel="stylesheet" href="../styles.css" />
   </head>
   <body>
     <div class="page-root">
       <div class="app-shell">
+        <!-- Üst Bar -->
         <header class="app-header">
           <div class="app-title-block">
             <div class="app-title">
               UniClub
-              <span class="app-title-badge">Admin Panel</span>
+              <span class="app-title-badge">Kulüp Admin Paneli</span>
             </div>
             <div class="app-subtitle">
-              Kulübünün bilgilerini buradan görüntüle ve güncelle.
+              Kulübünün bilgilerini ve işlemlerini buradan yönetebilirsin.
             </div>
           </div>
           <nav class="app-nav">
@@ -29,76 +30,231 @@
           </nav>
         </header>
 
-        <main class="dashboard-columns">
-          <section class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Kulüp Özeti</div>
-                <div class="card-subtitle">
-                  Veri, giriş yaptığın kulüp admini hesabına göre gösterilir.
+        <!-- Sol Menü + İçerik -->
+        <div class="dashboard-layout">
+          <!-- Sidebar -->
+          <aside class="sidebar">
+            <div class="sidebar-item active" data-page="overview">
+              🏠 Ana Sayfa
+            </div>
+            <div class="sidebar-item" data-page="club">🏛 Kulüp Bilgileri</div>
+            <div class="sidebar-item" data-page="events">
+              📅 Etkinlikler (yakında)
+            </div>
+            <div class="sidebar-item" data-page="members">
+              👥 Üyeler (yakında)
+            </div>
+          </aside>
+
+          <!-- İçerik -->
+          <main class="dashboard-content">
+            <!-- ANA SAYFA / GENEL BAKIŞ -->
+            <section id="page-overview" class="page-view active">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Genel Bakış</div>
+                    <div class="card-subtitle">
+                      Kulübünle ilgili özet bilgiler ve istatistikler.
+                    </div>
+                  </div>
+                  <span id="adminEmail" class="chip">(Giriş yapıldı)</span>
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 16px;
+                    margin-top: 10px;
+                  "
+                >
+                  <div class="stat-card">
+                    <div class="stat-label">Toplam Etkinlik</div>
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">Örnek veri</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-label">Toplam Üye</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Örnek veri</div>
+                  </div>
                 </div>
               </div>
-              <span class="chip" id="adminEmail">(Giriş yapılıyor...)</span>
-            </div>
-            <div id="clubInfo">Kulüp bilgileri yükleniyor...</div>
-          </section>
 
-          <section class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Kulüp Bilgilerini Güncelle</div>
-                <div class="card-subtitle">
-                  Ad, açıklama, e-posta ve telefonu düzenleyebilirsin.
+              <div class="card" style="margin-top: 18px">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Son Aktiviteler</div>
+                    <div class="card-subtitle">
+                      Kulüpteki son işlemler ve güncellemeler.
+                    </div>
+                  </div>
                 </div>
+                <p
+                  style="
+                    font-size: 13px;
+                    color: var(--text-muted);
+                    margin-top: 8px;
+                  "
+                >
+                  Yakında eklenecek…
+                </p>
               </div>
-            </div>
+            </section>
 
-            <form id="clubForm">
-              <label>
-                <span class="label">Kulüp Adı</span>
-                <input type="text" id="clubNameInput" placeholder="Kulüp adı" />
-              </label>
+            <!-- KULÜP BİLGİLERİ SAYFASI -->
+            <section id="page-club" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Kulüp Özeti</div>
+                    <div class="card-subtitle">
+                      Giriş yaptığın admin hesabına bağlı kulübün bilgileri.
+                    </div>
+                  </div>
+                </div>
 
-              <label>
-                <span class="label">Açıklama</span>
-                <textarea
-                  id="clubDescInput"
-                  placeholder="Kulüp açıklaması"
-                ></textarea>
-              </label>
+                <!-- admin.js burayı dolduruyor -->
+                <div id="clubInfo">Kulüp bilgileri yükleniyor...</div>
+              </div>
 
-              <label>
-                <span class="label">Kulüp E-posta</span>
-                <input
-                  type="email"
-                  id="clubEmailInput"
-                  placeholder="ornek@kulup.com"
-                />
-              </label>
+              <div class="card" style="margin-top: 18px">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Kulüp Bilgilerini Güncelle</div>
+                    <div class="card-subtitle">
+                      Ad, açıklama, e-posta ve telefon alanlarını
+                      düzenleyebilirsin.
+                    </div>
+                  </div>
+                </div>
 
-              <label>
-                <span class="label">Telefon</span>
-                <input
-                  type="text"
-                  id="clubPhoneInput"
-                  placeholder="05xx xxx xx xx"
-                />
-              </label>
+                <!-- Form id ve input id’leri admin.js ile uyumlu -->
+                <form id="clubForm">
+                  <label>
+                    <span class="label">Kulüp Adı</span>
+                    <input
+                      type="text"
+                      id="clubNameInput"
+                      placeholder="Kulüp adı"
+                    />
+                  </label>
 
-              <button
-                type="submit"
-                class="button-primary"
-                style="justify-content: center"
-              >
-                Kaydet
-              </button>
-              <div id="statusMsg" class="status-success"></div>
-            </form>
-          </section>
-        </main>
+                  <label>
+                    <span class="label">Açıklama</span>
+                    <textarea
+                      id="clubDescInput"
+                      placeholder="Kulüp açıklaması"
+                    ></textarea>
+                  </label>
+
+                  <label>
+                    <span class="label">Kulüp E-posta</span>
+                    <input
+                      type="email"
+                      id="clubEmailInput"
+                      placeholder="ornek@kulup.com"
+                    />
+                  </label>
+
+                  <label>
+                    <span class="label">Telefon</span>
+                    <input
+                      type="text"
+                      id="clubPhoneInput"
+                      placeholder="05xx xxx xx xx"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    class="button-primary"
+                    style="justify-content: center"
+                  >
+                    Kaydet
+                  </button>
+                  <div id="statusMsg" class="status-success"></div>
+                </form>
+              </div>
+            </section>
+
+            <!-- ETKİNLİKLER (placeholder) -->
+            <section id="page-events" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Etkinlikler</div>
+                    <div class="card-subtitle">
+                      Kulübünün etkinlikleri buradan yönetilecek.
+                    </div>
+                  </div>
+                </div>
+                <p
+                  style="
+                    font-size: 13px;
+                    color: var(--text-muted);
+                    margin-top: 8px;
+                  "
+                >
+                  Etkinlik yönetimi sayfası geliştirme aşamasında.
+                </p>
+              </div>
+            </section>
+
+            <!-- ÜYELER (placeholder) -->
+            <section id="page-members" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Üyeler</div>
+                    <div class="card-subtitle">
+                      Kulüp üyeleri buradan görüntülenip yönetilecek.
+                    </div>
+                  </div>
+                </div>
+                <p
+                  style="
+                    font-size: 13px;
+                    color: var(--text-muted);
+                    margin-top: 8px;
+                  "
+                >
+                  Üye yönetimi sayfası geliştirme aşamasında.
+                </p>
+              </div>
+            </section>
+          </main>
+        </div>
       </div>
     </div>
 
+    <!-- Mevcut JS -->
     <script src="admin.js"></script>
+
+    <!-- Sidebar tab geçişleri -->
+    <script>
+      const sidebarItems = document.querySelectorAll(".sidebar-item");
+      const pages = document.querySelectorAll(".page-view");
+
+      sidebarItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          const target = item.getAttribute("data-page");
+
+          // aktif item değişimi
+          sidebarItems.forEach((i) => i.classList.remove("active"));
+          item.classList.add("active");
+
+          // sayfa görünürlüğü
+          pages.forEach((page) => {
+            if (page.id === "page-" + target) {
+              page.classList.add("active");
+            } else {
+              page.classList.remove("active");
+            }
+          });
+        });
+      });
+    </script>
   </body>
 </html>
