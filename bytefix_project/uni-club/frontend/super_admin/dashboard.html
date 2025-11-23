@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Süper Yönetici Paneli</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="page-root">
+      <div class="app-shell">
+        <header class="app-header">
+          <div class="app-title-block">
+            <div class="app-title">
+              UniClub
+              <span class="app-title-badge">Süper Admin Panel</span>
+            </div>
+            <div class="app-subtitle">
+              Sistem yönetim paneline hoş geldiniz.
+            </div>
+          </div>
+          <nav class="app-nav">
+            <button
+              class="button-ghost"
+              onclick="window.location.href='../index.html'"
+            >
+              Ana Sayfa
+            </button>
+            <button class="button-primary" onclick="logout()">Çıkış</button>
+          </nav>
+        </header>
+
+        <div class="dashboard-layout">
+          <!-- Sidebar Menü -->
+          <aside class="sidebar">
+            <div class="sidebar-item active" data-page="dashboard" onclick="showPage('dashboard')">
+              <span>📊</span>
+              <span>Ana Sayfa</span>
+            </div>
+            <div class="sidebar-item" data-page="clubs" onclick="showPage('clubs')">
+              <span>🏛️</span>
+              <span>Kulüpler</span>
+            </div>
+            <div class="sidebar-item" data-page="announcements" onclick="showPage('announcements')">
+              <span>📢</span>
+              <span>Duyurular</span>
+            </div>
+            <div class="sidebar-item" data-page="users" onclick="showPage('users')">
+              <span>👥</span>
+              <span>Kullanıcılar</span>
+            </div>
+          </aside>
+
+          <!-- İçerik Alanı -->
+          <main class="dashboard-content">
+            <!-- Ana Sayfa (Dashboard) -->
+            <div id="page-dashboard" class="page-view active">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Genel Bakış</div>
+                    <div class="card-subtitle">
+                      Sistem özet bilgileri ve istatistikler.
+                    </div>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px">
+                  <div class="stat-card">
+                    <div class="stat-label">Toplam Kulüp</div>
+                    <div class="stat-value" id="statClubs">-</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-label">Toplam Kullanıcı</div>
+                    <div class="stat-value" id="statUsers">-</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-label">Aktif Duyuru</div>
+                    <div class="stat-value" id="statAnnouncements">-</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-label">Toplam Etkinlik</div>
+                    <div class="stat-value" id="statEvents">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card" style="margin-top: 16px">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Son Aktiviteler</div>
+                    <div class="card-subtitle">
+                      Sistemdeki son işlemler ve güncellemeler.
+                    </div>
+                  </div>
+                </div>
+                <div id="recentActivities" style="margin-top: 16px">
+                  <p style="color: var(--text-muted)">Yakında eklenecek...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kulüpler Sayfası -->
+            <div id="page-clubs" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Kulüpler</div>
+                    <div class="card-subtitle">
+                      Tüm kulüpleri görüntüle ve yönet.
+                    </div>
+                  </div>
+                  <button class="button-primary" onclick="showCreateModal()">
+                    + Yeni Kulüp
+                  </button>
+                </div>
+                <div id="clubsList">Kulüpler yükleniyor...</div>
+              </div>
+            </div>
+
+            <!-- Duyurular Sayfası -->
+            <div id="page-announcements" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Duyurular</div>
+                    <div class="card-subtitle">
+                      Sistem duyurularını yönet.
+                    </div>
+                  </div>
+                  <button class="button-primary" onclick="alert('Duyuru ekleme özelliği yakında eklenecek.')">
+                    + Yeni Duyuru
+                  </button>
+                </div>
+                <div id="announcementsList" style="margin-top: 16px">
+                  <p style="color: var(--text-muted)">Duyuru yönetimi özelliği geliştirme aşamasında.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kullanıcılar Sayfası -->
+            <div id="page-users" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Kullanıcılar</div>
+                    <div class="card-subtitle">
+                      Sistem kullanıcılarını görüntüle ve yönet.
+                    </div>
+                  </div>
+                  <button class="button-primary" onclick="alert('Kullanıcı ekleme özelliği yakında eklenecek.')">
+                    + Yeni Kullanıcı
+                  </button>
+                </div>
+                <div id="usersList" style="margin-top: 16px">
+                  <p style="color: var(--text-muted)">Kullanıcı yönetimi özelliği geliştirme aşamasında.</p>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kulüp Oluşturma/Güncelleme Modal -->
+    <div id="clubModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="modalTitle">Yeni Kulüp</div>
+            <div class="card-subtitle" id="modalSubtitle">
+              Kulüp bilgilerini gir.
+            </div>
+          </div>
+          <button class="button-ghost" onclick="closeModal()">✕</button>
+        </div>
+
+        <form id="clubForm">
+          <input type="hidden" id="clubId" />
+
+          <label>
+            <span class="label">Kulüp Adı *</span>
+            <input type="text" id="clubNameInput" placeholder="Kulüp adı" required />
+          </label>
+
+          <label>
+            <span class="label">Açıklama</span>
+            <textarea
+              id="clubDescInput"
+              placeholder="Kulüp açıklaması"
+            ></textarea>
+          </label>
+
+          <label>
+            <span class="label">Kulüp E-posta</span>
+            <input
+              type="email"
+              id="clubEmailInput"
+              placeholder="ornek@kulup.com"
+            />
+          </label>
+
+          <label>
+            <span class="label">Telefon</span>
+            <input
+              type="text"
+              id="clubPhoneInput"
+              placeholder="05xx xxx xx xx"
+            />
+          </label>
+
+          <label>
+            <span class="label">Admin ID (Opsiyonel)</span>
+            <input
+              type="number"
+              id="clubAdminIdInput"
+              placeholder="Kulüp admin ID'si"
+            />
+          </label>
+
+          <div style="display: flex; gap: 8px; margin-top: 16px">
+            <button
+              type="submit"
+              class="button-primary"
+              style="flex: 1; justify-content: center"
+            >
+              Kaydet
+            </button>
+            <button
+              type="button"
+              class="button-ghost"
+              onclick="closeModal()"
+            >
+              İptal
+            </button>
+          </div>
+          <div id="statusMsg" class="status-success"></div>
+        </form>
+      </div>
+    </div>
+
+    <script src="super_admin.js"></script>
+  </body>
+</html>

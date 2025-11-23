@@ -3,8 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.webAPI_layer.routers.club_admin import auth as club_admin_auth
 from app.webAPI_layer.routers.club_admin import club as club_admin_club
+from app.webAPI_layer.routers.super_admin import auth as super_admin_auth
+from app.webAPI_layer.routers.super_admin import club as super_admin_club
+from app.webAPI_layer.routers.super_admin import stats as super_admin_stats
 
-app = FastAPI(title="UniClub API (Kulüp Admini Odaklı)")
+app = FastAPI(title="UniClub API")
 
 
 app.add_middleware(
@@ -17,9 +20,14 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    return {"message": "UniClub API çalışıyor (kulüp admini modülü aktif)"}
+    return {"message": "UniClub API çalışıyor"}
 
 
 # Kulüp admini routerları
 app.include_router(club_admin_auth.router)
 app.include_router(club_admin_club.router)
+
+# Süper admin routerları
+app.include_router(super_admin_auth.router)
+app.include_router(super_admin_club.router)
+app.include_router(super_admin_stats.router)
