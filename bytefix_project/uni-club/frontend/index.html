@@ -20,11 +20,8 @@
           </div>
         </header>
 
-        <main
-          class="app-main"
-          style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px"
-        >
-          <!-- KULÜP ADMİNİ -->
+        <main class="app-main">
+          
           <section class="card">
             <div class="card-header">
               <div>
@@ -33,40 +30,24 @@
                   Kulüp bilgilerini ve etkinlikleri yöneten kullanıcı.
                 </div>
               </div>
-              <span class="chip">Aktif</span>
+              <span class="chip active-chip">Aktif</span>
             </div>
 
-            <ul
-              style="
-                padding-left: 16px;
-                margin: 8px 0 14px;
-                font-size: 12px;
-                color: var(--text-muted);
-              "
-            >
+            <ul class="feature-list">
               <li>• Kulüp profilini düzenler.</li>
-              <li>• Etkinlikleri oluşturur ve yönetir. (yakında)</li>
-              <li>• Üyelikleri görüntüler. (yakında)</li>
+              <li>• Etkinlikleri yönetir. (yakında)</li>
+              <li>• Üyeleri görüntüler. (yakında)</li>
             </ul>
 
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-top: 6px;
-              "
-            >
+            <div class="card-actions">
               <button
-                class="button-primary"
-                style="justify-content: center; width: 100%"
+                class="button-primary full-width"
                 onclick="window.location.href='admin/login.html'"
               >
                 Giriş Yap
               </button>
               <button
-                class="button-ghost"
-                style="justify-content: center; width: 100%"
+                class="button-ghost full-width"
                 onclick="window.location.href='admin/register.html'"
               >
                 Kayıt Ol
@@ -74,7 +55,6 @@
             </div>
           </section>
 
-          <!-- SÜPER ADMİN -->
           <section class="card">
             <div class="card-header">
               <div>
@@ -83,48 +63,31 @@
                   Sistem genelini yöneten, tüm kulüpleri gören kullanıcı.
                 </div>
               </div>
-              <span class="chip">Aktif</span>
+              <span class="chip active-chip">Aktif</span>
             </div>
 
-            <ul
-              style="
-                padding-left: 16px;
-                margin: 8px 0 14px;
-                font-size: 12px;
-                color: var(--text-muted);
-              "
-            >
+            <ul class="feature-list">
               <li>• Tüm kulüpleri görüntüler.</li>
               <li>• Kulüp adminlerini yönetir.</li>
               <li>• Sistem ayarlarını düzenler.</li>
             </ul>
 
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-top: 6px;
-              "
-            >
+            <div class="card-actions">
               <button
-                class="button-primary"
-                style="justify-content: center; width: 100%"
+                class="button-primary full-width"
                 onclick="window.location.href='super_admin/login.html'"
               >
                 Giriş Yap
               </button>
               <button
-                class="button-ghost"
-                style="justify-content: center; width: 100%"
-                onclick="alert('Süper admin kaydı için lütfen sistem yöneticisine başvurun.')"
+                class="button-ghost full-width"
+                onclick="alert('Süper admin kaydı için sistem yöneticisine başvurun.')"
               >
                 Kayıt Ol
               </button>
             </div>
           </section>
 
-          <!-- ÜYE -->
           <section class="card">
             <div class="card-header">
               <div>
@@ -133,58 +96,35 @@
                   Kulüplere katılan ve etkinliklere kaydolan öğrenci.
                 </div>
               </div>
-              <span class="chip">Yakında</span>
+              <span class="chip active-chip">Aktif</span>
             </div>
 
-            <ul
-              style="
-                padding-left: 16px;
-                margin: 8px 0 14px;
-                font-size: 12px;
-                color: var(--text-muted);
-              "
-            >
-              <li>• Kulüpleri görüntüler ve başvurur.</li>
-              <li>• Etkinliklere kayıt olur.</li>
+            <ul class="feature-list">
               <li>• Kendi profilini yönetir.</li>
+              <li>• Kulüpleri görüntüler ve başvurur.</li>
+              <li>• Etkinliklere kayıt olur. (yakında)</li>
             </ul>
 
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                margin-top: 6px;
-              "
-            >
+            <div class="card-actions">
               <button
-                class="button-ghost"
-                style="
-                  justify-content: center;
-                  width: 100%;
-                  opacity: 0.6;
-                  cursor: not-allowed;
-                "
-                onclick="alert('Üye girişi geliştirme aşamasında.')"
+                class="button-primary full-width"
+                onclick="window.location.href='member/login.html'"
               >
                 Giriş Yap
               </button>
               <button
-                class="button-ghost"
-                style="
-                  justify-content: center;
-                  width: 100%;
-                  opacity: 0.6;
-                  cursor: not-allowed;
-                "
-                onclick="alert('Üye kayıt ekranı geliştirme aşamasında.')"
+                class="button-ghost full-width"
+                onclick="window.location.href='member/register.html'"
               >
                 Kayıt Ol
               </button>
             </div>
           </section>
+
         </main>
       </div>
     </div>
+
+    <script src="app.js"></script>
   </body>
 </html>
