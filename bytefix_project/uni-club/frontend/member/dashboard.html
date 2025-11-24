@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Üye Paneli | UniClub</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="page-root">
+      <div class="app-shell">
+        <header class="app-header">
+          <div class="app-title-block">
+            <div class="app-title">
+              UniClub
+              <span class="app-title-badge">Üye Paneli</span>
+            </div>
+            <div class="app-subtitle">
+              Kulüpleri keşfet, etkinliklere katıl ve profilini yönet.
+            </div>
+          </div>
+          <nav class="app-nav">
+            <button
+              class="button-ghost"
+              onclick="window.location.href='../index.html'"
+            >
+              Ana Sayfa
+            </button>
+            <button class="button-primary" onclick="logout()">Çıkış</button>
+          </nav>
+        </header>
+
+        <div class="dashboard-layout">
+          <aside class="sidebar">
+            <div class="sidebar-item active" data-page="overview">
+              🏠 Genel Bakış
+            </div>
+            <div class="sidebar-item" data-page="clubs">
+              🏛 Kulüpler
+            </div>
+            <div class="sidebar-item" data-page="events">
+              📅 Etkinlikler
+            </div>
+            <div class="sidebar-item" data-page="profile">
+              👤 Profilim
+            </div>
+          </aside>
+
+          <main class="dashboard-content">
+            
+            <section id="page-overview" class="page-view active">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Hoş Geldin</div>
+                    <div class="card-subtitle">
+                      Üyelik durumun ve aktivitelerin burada.
+                    </div>
+                  </div>
+                  <span id="userEmailBadge" class="chip">(Yükleniyor...)</span>
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 16px;
+                    margin-top: 10px;
+                  "
+                >
+                  <div class="stat-card">
+                    <div class="stat-label">Üye Olduğum Kulüpler</div>
+                    <div class="stat-value" id="statClubsCount">-</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-label">Katıldığım Etkinlikler</div>
+                    <div class="stat-value" id="statEventsCount">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card" style="margin-top: 18px">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Duyurular</div>
+                    <div class="card-subtitle">
+                      Kulüplerden gelen son haberler.
+                    </div>
+                  </div>
+                </div>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+                  Henüz yeni bir duyuru yok.
+                </p>
+              </div>
+            </section>
+
+            <section id="page-clubs" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Tüm Kulüpler</div>
+                    <div class="card-subtitle">
+                      Üniversitedeki aktif kulüplerin listesi.
+                    </div>
+                  </div>
+                </div>
+                <div id="clubListContainer" style="margin-top: 10px;">
+                    Yükleniyor...
+                </div>
+              </div>
+            </section>
+
+            <section id="page-events" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Yaklaşan Etkinlikler</div>
+                    <div class="card-subtitle">
+                      Kaydolabileceğin etkinlikler.
+                    </div>
+                  </div>
+                </div>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
+                  Etkinlik listesi geliştirme aşamasında.
+                </p>
+              </div>
+            </section>
+
+            <section id="page-profile" class="page-view">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Profil Bilgileri</div>
+                    <div class="card-subtitle">
+                      Kişisel bilgilerini buradan güncelleyebilirsin.
+                    </div>
+                  </div>
+                </div>
+
+                <div id="profileInfo">Profil yükleniyor...</div>
+              </div>
+
+              <div class="card" style="margin-top: 18px">
+                <div class="card-header">
+                    <div>
+                      <div class="card-title">Bilgileri Güncelle</div>
+                    </div>
+                </div>
+
+                <form id="profileForm">
+                    <label>
+                        <span class="label">Öğrenci No (Değiştirilemez)</span>
+                        <input type="text" id="profileOgrenciNo" disabled style="opacity: 0.6;" />
+                    </label>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <label>
+                            <span class="label">Ad</span>
+                            <input type="text" id="profileName" />
+                        </label>
+                        <label>
+                            <span class="label">Soyad</span>
+                            <input type="text" id="profileSurname" />
+                        </label>
+                    </div>
+
+                    <label>
+                        <span class="label">E-posta</span>
+                        <input type="email" id="profileEmail" />
+                    </label>
+
+                    <button type="submit" class="button-primary" style="justify-content: center">
+                        Güncelle
+                    </button>
+                    <div id="statusMsg" class="status-success"></div>
+                </form>
+              </div>
+            </section>
+
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script src="user.js"></script>
+
+    <script>
+      const sidebarItems = document.querySelectorAll(".sidebar-item");
+      const pages = document.querySelectorAll(".page-view");
+
+      sidebarItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          const target = item.getAttribute("data-page");
+
+          // Sidebar aktifliği
+          sidebarItems.forEach((i) => i.classList.remove("active"));
+          item.classList.add("active");
+
+          // Sayfa görünürlüğü
+          pages.forEach((page) => {
+            if (page.id === "page-" + target) {
+              page.classList.add("active");
+            } else {
+              page.classList.remove("active");
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
