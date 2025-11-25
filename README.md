@@ -1,140 +1,77 @@
-# UniClub (Demo)
+# UniClub (Sprint 1 - MVP) 
 
-FastAPI + SQLite tabanlı basit bir kulüp yönetimi API’si ve düz HTML/JS ile minimal bir arayüz.
+**Üniversite Kulüp Yönetim Sistemi**
 
----
+UniClub, üniversite öğrencilerinin kulüpleri keşfetmesini, kulüp yöneticilerinin topluluklarını yönetmesini ve süper yöneticilerin sistemi denetlemesini sağlayan kapsamlı bir platformdur.
 
-## Önkoşullar
-
-- **Python 3.10+** (Windows’ta `py`, diğer platformlarda `python3`)
-- **pip** (Python paket yöneticisi)
-- **Node.js gerekmez** (frontend statik dosyalarla servis edilir). İsterseniz `npx http-server` gibi basit bir statik sunucu kullanabilirsiniz.  
-  *Geliştirme için öneri:* sanal ortam (`venv`).
+**Kasım 2025** itibarıyla **Sprint 1** tamamlanmış ve **MVP (Minimum Viable Product)** sürümü yayınlanmıştır.
 
 ---
 
-## Klasör Yapısı
+## 📅 Proje Durumu & Yol Haritası (Roadmap)
 
-```text
-uni-club/
-├─ backend/
-│  ├─ app/
-│  │  ├─ business_layer/
-│  │  │  └─ system_message_service.py
-│  │  ├─ data_access_layer/
-│  │  │  ├─ db.py
-│  │  │  ├─ models.py
-│  │  │  └─ database/
-│  │  │     ├─ uniclub.db            # SQLite dosyası (ilk çalıştırmada oluşur)
-│  │  │     └─ sample.sql            # (opsiyonel) örnek veri scripti
-│  │  └─ webAPI_layer/
-│  │     └─ main.py                  # FastAPI uygulaması
-│  └─ requirements.txt (opsiyonel)
-└─ frontend/
-   ├─ index.html
-   └─ app.js
-```
+ByteFix GO Product Roadmap doğrultusunda Kasım ayı hedefleri başarıyla gerçekleştirilmiştir.
+
+| Hedef Tarih | Sürüm | Durum | Kapsam |
+| :--- | :--- | :--- | :--- |
+| **Kasım 2025** | **MVP** | ✅ **Tamamlandı** | Öğrenci/Kulüp üyelikleri, Oturum Açma, Temel Dashboardlar |
+| Aralık 2025 | V1 | ⏳ Bekleniyor | Kulüp Detay Sayfaları, Başvuru Yönetimi, Filtreleme |
+| Ocak 2026 | V2 | ⏳ Bekleniyor | Etkinlik Oluşturma, Kayıt/İptal İşlemleri |
+
+### 🏆 Sprint 1 Kazanımları (Tamamlanan Özellikler)
+* **Kimlik Doğrulama (Auth):** JWT tabanlı güvenli Giriş (Login) ve Kayıt (Register) sistemi.
+* **Rol Bazlı Erişim:**
+    * **Üye (Öğrenci):** Kayıt olma, giriş yapma, profil görüntüleme ve kulüp listesini görme.
+    * **Kulüp Admini:** Kulüp bilgilerini görüntüleme ve güncelleme.
+    * **Süper Admin:** Sistem genelindeki kulüp ve kullanıcı sayılarını izleme.
+* **Modern Arayüz:** Responsive, CSS Grid tabanlı, koyu mod (dark theme) tasarımı.
+* **Backend API:** FastAPI, SQLAlchemy ve SQLite ile sağlam bir altyapı.
 
 ---
 
-## Kurulum ve Çalıştırma
+## 📸 Ekran Görüntüleri
 
-### Backend (API)
+### Giriş ve Rol Seçimi
+Kullanıcılar sisteme girmek istedikleri rolü (Öğrenci, Kulüp Admini, Süper Admin) buradan seçerler.
+![Giriş Ekranı](screenshots/landing.jpg)
 
-```powershell
+### Üye Paneli (Öğrenci)
+Öğrenciler kendi profillerini yönetebilir ve aktif kulüpleri listeleyebilir.
+![Üye Dashboard](screenshots/member_dashboard.jpg)
+
+### Kulüp Yönetim Paneli
+Kulüp yöneticileri, kulüplerine ait özet bilgilere (üye sayısı, etkinlik sayısı) buradan erişir.
+![Kulüp Admin Dashboard](screenshots/club_admin_dashboard.jpg)
+
+### Süper Admin Paneli
+Sistem genelindeki tüm metriklerin (Toplam Kulüp, Kullanıcı vb.) görüntülendiği yönetim ekranı.
+![Süper Admin Dashboard](screenshots/super_admin_dashboard.jpg)
+
+---
+
+## 🛠 Kurulum ve Çalıştırma
+
+Projeyi yerel makinenizde çalıştırmak için aşağıdaki adımları izleyin.
+
+### Önkoşullar
+* **Python 3.10+**
+* **pip**
+
+### 1. Backend (API) Kurulumu
+
+```bash
 cd backend
 
-# (Opsiyonel) Sanal ortam
+# Sanal ortam oluşturma (Önerilen)
 py -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1  # Windows için
 
-# Bağımlılıklar
-py -m pip install --upgrade pip
-py -m pip install fastapi "uvicorn[standard]" sqlalchemy python-dotenv
+# Bağımlılıkları yükle
+pip install -r requirements.txt
+# veya manuel: pip install fastapi "uvicorn[standard]" sqlalchemy python-dotenv passlib python-jose[cryptography]
 
-# API’yi başlat
+# Veritabanını oluştur ve örnek verileri yükle (ÖNEMLİ ADIM)
+python -m app.tools.sample_data
+
+# Sunucuyu başlat
 uvicorn app.webAPI_layer.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-Başarılı durumda terminalde:
-
-```
-Uvicorn running on http://127.0.0.1:8000
-```
-
-- API kök: <http://127.0.0.1:8000/>
-- Swagger: <http://127.0.0.1:8000/docs>
-
-> Not: `app` altındaki klasörlerin paket olması için `__init__.py` dosyaları mevcut olmalıdır.
-
-### Frontend (Statik)
-
-Frontend düz HTML/JS’tir. Bir statik sunucuyla servis edin ya da dosyayı doğrudan açın.
-
-**Seçenek A – VS Code Live Server (sende 5500’de çalıştı):**
-- `index.html` → sağ tık → **Open with Live Server**  
-- Aç: <http://localhost:5500>
-
-**Seçenek B – Python ile:**
-```powershell
-cd frontend
-py -m http.server 5173
-# Aç: http://localhost:5173
-```
-
-**API Adresi**  
-`frontend/app.js` içindeki taban URL’yi kendi API portuna göre ayarlayın:
-
-```js
-const API_URL = "http://127.0.0.1:8000";
-```
-
----
-
-## API Kullanımı
-
-- `GET /` → API durum kontrolü  
-- `GET /gelistirme` → sitede gösterilen geliştirme duyurusu  
-- `GET /clubs` → kulüp listesi  
-- `POST /clubs` → yeni kulüp ekler (sade parametrelerle)  
-- `POST /clubs/sample-data` → örnek verileri ekler  
-
-**Örnek:**
-```bash
-# API çalışıyor mu?
-curl http://127.0.0.1:8000/
-
-# Geliştirme duyurusu
-curl http://127.0.0.1:8000/gelistirme
-
-# Kulüpler
-curl http://127.0.0.1:8000/clubs
-
-# Örnek veri yükle
-curl -X POST http://127.0.0.1:8000/clubs/sample-data
-
-# Yeni kulüp ekle (query param ile)
-curl -X POST "http://127.0.0.1:8000/clubs?name=Satranç%20Kulübü&description=Turnuvalar"
-```
-
----
-
-## Test / Doğrulama
-
-1. `uvicorn` ile API’yi başlatın; <http://127.0.0.1:8000/docs>’ta endpointleri deneyin.  
-2. Frontend’i **Live Server ile** <http://localhost:5500> (veya `http.server` ile <http://localhost:5173>) üzerinden açın.  
-3. Tarayıcı **Network** sekmesinde `/gelistirme` ve `/clubs` çağrılarının `200 OK` döndüğünü doğrulayın.  
-4. Gerekirse `POST /clubs/sample-data` ile örnek veriyi yükleyin.
-
----
-
-## Sık Karşılaşılan Sorunlar
-
-- **`ModuleNotFoundError: No module named 'app'`**: `uvicorn` komutunu **backend** klasöründen çalıştırın ve `app` alt klasörlerinde `__init__.py` olduğundan emin olun.  
-- **`document is not defined`**: `node app.js` çalıştırmayın; `app.js` tarayıcı içindir. Statik sunucu ile `index.html` açın.  
-- **CORS**: `main.py` içinde `allow_origins=["*"]` açık. Kısıtlamak isterseniz ilgili origin’i ekleyin.  
-- **Veritabanı yolu**: `backend/app/data_access_layer/database/uniclub.db` altında oluşur.
-
----
-
-> Not: Frontend’in 5500 portunda çalışması **Live Server**’ın varsayılanından kaynaklı; başka makinelerde port farklı olabilir (ör. 5173). README’de iki seçenek de verildiği için herkes kendi kurulumuna göre açabilir.
