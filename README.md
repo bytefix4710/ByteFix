@@ -33,19 +33,19 @@ ByteFix GO Product Roadmap doğrultusunda Kasım ayı hedefleri başarıyla ger�
 
 ### Giriş ve Rol Seçimi
 Kullanıcılar sisteme girmek istedikleri rolü (Öğrenci, Kulüp Admini, Süper Admin) buradan seçerler.
-![Giriş Ekranı](frontend/screenshots/landing.png)
+![Giriş Ekranı](bytefix_project/uni-club/frontend/screenshots/landing.png)
 
 ### Üye Paneli (Öğrenci)
 Öğrenciler kendi profillerini yönetebilir ve aktif kulüpleri listeleyebilir.
-![Üye Dashboard](frontend/screenshots/member_dashboard.png)
+![Üye Dashboard](bytefix_project/uni-club/frontend/screenshots/member_dashboard.png)
 
 ### Kulüp Yönetim Paneli
 Kulüp yöneticileri, kulüplerine ait özet bilgilere (üye sayısı, etkinlik sayısı) buradan erişir.
-![Kulüp Admin Dashboard](frontend/screenshots/club_admin_dashboard.png)
+![Kulüp Admin Dashboard](bytefix_project/uni-club/frontend/screenshots/club_admin_dashboard.png)
 
 ### Süper Admin Paneli
 Sistem genelindeki tüm metriklerin (Toplam Kulüp, Kullanıcı vb.) görüntülendiği yönetim ekranı.
-![Süper Admin Dashboard](frontend/screenshots/super_admin_dashboard.png)
+![Süper Admin Dashboard](bytefix_project/uni-club/frontend/screenshots/super_admin_dashboard.png)
 ---
 
 ## 🛠 Kurulum ve Çalıştırma
