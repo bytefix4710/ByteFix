@@ -77,3 +77,36 @@ python -m app.tools.sample_data
 
 # Sunucuyu başlat
 uvicorn app.webAPI_layer.main:app --reload --host 127.0.0.1 --port 8000
+2. Frontend (Arayüz) Kurulumu
+Frontend saf HTML/JS/CSS olduğu için herhangi bir derlemeye ihtiyaç duymaz.
+
+VS Code Live Server (Önerilen): frontend/index.html dosyasına sağ tıklayıp "Open with Live Server" diyerek açın.
+
+Python ile:
+
+Bash
+
+cd frontend
+py -m http.server 5500
+Tarayıcıda http://127.0.0.1:5500 adresine gidin.
+
+📂 Klasör Yapısı
+uni-club/
+├─ backend/
+│  ├─ app/
+│  │  ├─ business_layer/     # İş mantığı servisleri (Auth vb.)
+│  │  ├─ data_access_layer/  # Veritabanı modelleri ve bağlantısı
+│  │  │  └─ database/        # uniclub.db burada oluşur
+│  │  ├─ tools/              # Örnek veri scriptleri (sample_data.py)
+│  │  └─ webAPI_layer/       # Routerlar ve Main.py
+│  └─ requirements.txt
+└─ frontend/
+   ├─ admin/                 # Kulüp Admin sayfaları
+   ├─ member/                # Öğrenci (Üye) sayfaları
+   ├─ super_admin/           # Süper Admin sayfaları
+   ├─ screenshots/           # Proje görselleri (landing.png vb.)
+   ├─ index.html             # Karşılama ekranı
+   ├─ styles.css             # Global stil dosyası
+   └─ app.js                 # Genel scriptler
+
+Geliştirici: ByteFix Ekibi | Kasım 2025
