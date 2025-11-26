@@ -1,6 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 from .db import Base
+
+# =============== STATUS SABİTLERİ ===============
+STATUS_PENDING = "beklemede"
+STATUS_APPROVED = "onaylandı"
+STATUS_REJECTED = "reddedildi"
 
 
 # =============== MEMBER TABLOSU ===============
@@ -54,6 +59,7 @@ class SuperAdmin(Base):
 # club:
 #   kulupId (PK), ad, admin (FK -> club_admin.hesapId),
 #   email, telefon, açıklama
+#   + misyon, vizyon, resim
 class Club(Base):
     __tablename__ = "club"
 
@@ -63,6 +69,11 @@ class Club(Base):
     email = Column("email", String(255), nullable=True)
     phone = Column("telefon", String(50), nullable=True)
     description = Column("aciklama", String(500), nullable=True)
+
+    # --- yeni alanlar ---
+    mission = Column("misyon", Text, nullable=True)
+    vision = Column("vizyon", Text, nullable=True)
+    image_url = Column("resim", String(500), nullable=True)  # dosya adı / URL
 
     admin_user = relationship("ClubAdmin", back_populates="clubs")
 
@@ -82,6 +93,7 @@ class Club(Base):
 # membership:
 #   uyelikId (PK), kulupId (FK -> club.kulupId),
 #   ogrenciId (FK -> member.ogrenci_no)
+#   + status (beklemede / onaylandı / reddedildi)
 class Membership(Base):
     __tablename__ = "membership"
 
@@ -92,6 +104,12 @@ class Membership(Base):
         String(20),
         ForeignKey("member.ogrenci_no"),
         nullable=False,
+    )
+    status = Column(
+        "status",
+        String(20),
+        nullable=False,
+        default=STATUS_PENDING,
     )
 
     club = relationship("Club", back_populates="memberships")
@@ -122,6 +140,7 @@ class Event(Base):
 # event_reg:
 #   kayitId (PK), etkinlikId (FK -> event.etkinlikId),
 #   ogrenciId (FK -> member.ogrenci_no)
+#   + status (beklemede / onaylandı / reddedildi)
 class EventReg(Base):
     __tablename__ = "event_reg"
 
@@ -132,6 +151,12 @@ class EventReg(Base):
         String(20),
         ForeignKey("member.ogrenci_no"),
         nullable=False,
+    )
+    status = Column(
+        "status",
+        String(20),
+        nullable=False,
+        default=STATUS_PENDING,
     )
 
     event = relationship("Event", back_populates="registrations")

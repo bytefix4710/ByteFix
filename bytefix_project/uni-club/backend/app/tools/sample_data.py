@@ -80,6 +80,9 @@ def reset_and_seed():
             email="bilmuh@uni.test",
             phone="0500 000 00 01",
             description="Yazılım, donanım ve teknoloji odaklı kulüp.",
+            mission="Öğrencilerin yazılım ve donanım alanlarında kendini geliştirmesini sağlamak.",
+            vision="Üniversitenin en aktif teknoloji topluluğu olmak.",
+            image_url="bilmuh.jpg",
         )
         club2 = models.Club(
             name="Fotoğrafçılık Kulübü",
@@ -87,6 +90,9 @@ def reset_and_seed():
             email="fotograf@uni.test",
             phone="0500 000 00 02",
             description="Fotoğraf çekmeyi sevenler için.",
+            mission="Fotoğrafçılık kültürünü yaymak ve üyelerin vizyonunu genişletmek.",
+            vision="Şehrin en yaratıcı fotoğraf topluluğu olmak.",
+            image_url="fotograf.jpg",
         )
         club3 = models.Club(
             name="Müzik Kulübü",
@@ -94,6 +100,9 @@ def reset_and_seed():
             email="muzik@uni.test",
             phone="0500 000 00 03",
             description="Enstrüman ve vokal çalışmaları.",
+            mission="Müzikle ilgilenen öğrencileri bir araya getirmek.",
+            vision="Konser ve sahne performanslarında üniversiteyi temsil eden bir kulüp olmak.",
+            image_url="muzik.jpg",
         )
         db.add_all([club1, club2, club3])
         db.commit()
@@ -105,11 +114,31 @@ def reset_and_seed():
         # 1001: club1 + club3
         # 1002: club1 + club2
         # 1003: club2
-        mship1 = models.Membership(kulup_id=club1.kulup_id, ogrenci_id="1001")
-        mship2 = models.Membership(kulup_id=club1.kulup_id, ogrenci_id="1002")
-        mship3 = models.Membership(kulup_id=club2.kulup_id, ogrenci_id="1002")
-        mship4 = models.Membership(kulup_id=club2.kulup_id, ogrenci_id="1003")
-        mship5 = models.Membership(kulup_id=club3.kulup_id, ogrenci_id="1001")
+        mship1 = models.Membership(
+            kulup_id=club1.kulup_id,
+            ogrenci_id="1001",
+            status=models.STATUS_APPROVED,
+        )
+        mship2 = models.Membership(
+            kulup_id=club1.kulup_id,
+            ogrenci_id="1002",
+            status=models.STATUS_PENDING,
+        )
+        mship3 = models.Membership(
+            kulup_id=club2.kulup_id,
+            ogrenci_id="1002",
+            status=models.STATUS_APPROVED,
+        )
+        mship4 = models.Membership(
+            kulup_id=club2.kulup_id,
+            ogrenci_id="1003",
+            status=models.STATUS_REJECTED,
+        )
+        mship5 = models.Membership(
+            kulup_id=club3.kulup_id,
+            ogrenci_id="1001",
+            status=models.STATUS_PENDING,
+        )
         db.add_all([mship1, mship2, mship3, mship4, mship5])
         db.commit()
 
@@ -133,11 +162,31 @@ def reset_and_seed():
         # --- 5 ETKİNLİK KAYDI (event_reg tablosu) ---
         # event1: 1001, 1002, 1003
         # event2: 1001, 1003
-        reg1 = models.EventReg(etkinlik_id=event1.etkinlik_id, ogrenci_id="1001")
-        reg2 = models.EventReg(etkinlik_id=event1.etkinlik_id, ogrenci_id="1002")
-        reg3 = models.EventReg(etkinlik_id=event1.etkinlik_id, ogrenci_id="1003")
-        reg4 = models.EventReg(etkinlik_id=event2.etkinlik_id, ogrenci_id="1001")
-        reg5 = models.EventReg(etkinlik_id=event2.etkinlik_id, ogrenci_id="1003")
+        reg1 = models.EventReg(
+            etkinlik_id=event1.etkinlik_id,
+            ogrenci_id="1001",
+            status=models.STATUS_APPROVED,
+        )
+        reg2 = models.EventReg(
+            etkinlik_id=event1.etkinlik_id,
+            ogrenci_id="1002",
+            status=models.STATUS_PENDING,
+        )
+        reg3 = models.EventReg(
+            etkinlik_id=event1.etkinlik_id,
+            ogrenci_id="1003",
+            status=models.STATUS_REJECTED,
+        )
+        reg4 = models.EventReg(
+            etkinlik_id=event2.etkinlik_id,
+            ogrenci_id="1001",
+            status=models.STATUS_APPROVED,
+        )
+        reg5 = models.EventReg(
+            etkinlik_id=event2.etkinlik_id,
+            ogrenci_id="1003",
+            status=models.STATUS_PENDING,
+        )
         db.add_all([reg1, reg2, reg3, reg4, reg5])
         db.commit()
 
