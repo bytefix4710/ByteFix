@@ -186,30 +186,77 @@
               </div>
             </section>
 
-            <!-- ETKİNLİKLER (placeholder) -->
+            <!-- ETKİNLİKLER -->
             <section id="page-events" class="page-view">
               <div class="card">
                 <div class="card-header">
                   <div>
-                    <div class="card-title">Etkinlikler</div>
+                    <div class="card-title">Etkinliklerim</div>
                     <div class="card-subtitle">
-                      Kulübünün etkinlikleri buradan yönetilecek.
+                      Kulübüne ait etkinlikleri görüntüleyebilirsin.
                     </div>
                   </div>
                 </div>
-                <p
-                  style="
-                    font-size: 13px;
-                    color: var(--text-muted);
-                    margin-top: 8px;
-                  "
-                >
-                  Etkinlik yönetimi sayfası geliştirme aşamasında.
-                </p>
+
+                <div id="eventsList">Etkinlikler yükleniyor...</div>
+              </div>
+
+              <div class="card" style="margin-top: 18px">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Yeni Etkinlik Oluştur</div>
+                    <div class="card-subtitle">
+                      Ad ve tarih belirleyerek yeni bir etkinlik ekleyebilirsin.
+                    </div>
+                  </div>
+                </div>
+
+                <form id="eventForm">
+                  <label>
+                    <span class="label">Etkinlik Adı</span>
+                    <input
+                      type="text"
+                      id="eventNameInput"
+                      placeholder="Örn: Algoritma Çalıştayı"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    <span class="label">Tarih ve Saat</span>
+                    <input type="datetime-local" id="eventDateInput" required />
+                  </label>
+
+                  <label>
+                    <span class="label">Açıklama</span>
+                    <textarea
+                      id="eventDescInput"
+                      placeholder="Etkinliğin içeriğini kısaca anlatın."
+                    ></textarea>
+                  </label>
+
+                  <label>
+                    <span class="label">Fotoğraf (URL veya dosya adı)</span>
+                    <input
+                      type="text"
+                      id="eventImageInput"
+                      placeholder="örnek: algoritma.jpg veya https://..."
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    class="button-primary"
+                    style="justify-content: center"
+                  >
+                    Oluştur
+                  </button>
+                  <div id="eventStatusMsg" class="status-success"></div>
+                </form>
               </div>
             </section>
 
-            <!-- ÜYELER (placeholder) -->
+            <!-- ÜYELER -->
             <section id="page-members" class="page-view">
               <div class="card">
                 <div class="card-header">

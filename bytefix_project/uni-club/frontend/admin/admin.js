@@ -427,3 +427,154 @@ if (filterSelect) {
     renderMemberTable(value);
   });
 }
+
+// ----------------------------
+// ETKİNLİKLERİ YÜKLEME
+// ----------------------------
+async function loadEvents() {
+  const eventsBox = document.getElementById("eventsList");
+  if (!eventsBox) return;
+
+  try {
+    const res = await fetch(`${API}/club-admin/events`, {
+      headers: { ...authHeader() },
+    });
+
+    if (res.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error("Etkinlikler alınamadı.");
+    }
+
+    const events = await res.json();
+
+    if (events.length === 0) {
+      eventsBox.innerHTML =
+        "<p style='color: var(--text-muted); font-size:13px;'>Henüz etkinlik yok.</p>";
+      return;
+    }
+
+    eventsBox.innerHTML = events
+      .map((e) => {
+        const dt = new Date(e.datetime);
+        const formatted = dt.toLocaleString("tr-TR");
+        const desc = e.description || "";
+        const img = e.image_url || "";
+
+        return `
+          <div class="member-row" style="margin-bottom:10px;">
+            <div class="member-info">
+              <div><strong>${e.name}</strong></div>
+              <div class="member-email">${formatted}</div>
+              ${
+                desc
+                  ? `<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${desc}</div>`
+                  : ""
+              }
+              ${
+                img
+                  ? `<div style="font-size:11px; color:var(--text-muted); margin-top:3px;">
+                       Fotoğraf: <code>${img}</code>
+                     </div>`
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (err) {
+    console.error(err);
+    eventsBox.innerHTML =
+      "<p style='color:red; font-size:13px;'>Etkinlikler yüklenirken hata oluştu.</p>";
+  }
+}
+
+// Etkinlikler sekmesine tıklanınca listeyi yükle
+const eventsTab = document.querySelector("[data-page='events']");
+if (eventsTab) {
+  eventsTab.addEventListener("click", () => {
+    loadEvents();
+  });
+}
+
+const eventForm = document.getElementById("eventForm");
+if (eventForm) {
+  eventForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nameInput = document.getElementById("eventNameInput");
+    const dateInput = document.getElementById("eventDateInput");
+    const descInput = document.getElementById("eventDescInput");
+    const imageInput = document.getElementById("eventImageInput");
+    const statusMsg = document.getElementById("eventStatusMsg");
+
+    if (statusMsg) {
+      statusMsg.textContent = "";
+      statusMsg.classList.remove("status-error", "status-success");
+    }
+
+    const name = nameInput.value.trim();
+    const datetimeValue = dateInput.value; // "2025-12-05T14:30"
+    const description = descInput.value.trim();
+    const image_url = imageInput.value.trim();
+
+    if (!name || !datetimeValue) {
+      if (statusMsg) {
+        statusMsg.textContent =
+          "Lütfen etkinlik adı ve tarih alanlarını doldurun.";
+        statusMsg.classList.add("status-error");
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/club-admin/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeader(),
+        },
+        body: JSON.stringify({
+          name,
+          datetime: datetimeValue,
+          description: description || null,
+          image_url: image_url || null,
+        }),
+      });
+
+      if (res.status === 401) {
+        logout();
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Etkinlik oluşturulamadı.");
+      }
+
+      if (statusMsg) {
+        statusMsg.textContent = "Etkinlik başarıyla oluşturuldu ✅";
+        statusMsg.classList.add("status-success");
+      }
+
+      // formu temizle
+      nameInput.value = "";
+      dateInput.value = "";
+      descInput.value = "";
+      imageInput.value = "";
+
+      // listeyi ve istatistikleri yenile
+      loadEvents();
+      loadStats();
+    } catch (err) {
+      console.error(err);
+      if (statusMsg) {
+        statusMsg.textContent = err.message;
+        statusMsg.classList.add("status-error");
+      }
+    }
+  });
+}
