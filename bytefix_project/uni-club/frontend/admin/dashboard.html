@@ -64,20 +64,27 @@
                 <div
                   style="
                     display: grid;
-                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
                     gap: 16px;
                     margin-top: 10px;
                   "
                 >
                   <div class="stat-card">
-                    <div class="stat-label">Toplam Etkinlik</div>
-                    <div class="stat-value">2</div>
-                    <div class="stat-label">Örnek veri</div>
-                  </div>
-                  <div class="stat-card">
                     <div class="stat-label">Toplam Üye</div>
-                    <div class="stat-value">5</div>
-                    <div class="stat-label">Örnek veri</div>
+                    <div id="totalMembersValue" class="stat-value">0</div>
+                    <div class="stat-label">Onaylanmış üye sayısı.</div>
+                  </div>
+
+                  <div class="stat-card">
+                    <div class="stat-label">Toplam Etkinlik</div>
+                    <div id="totalEventsValue" class="stat-value">0</div>
+                    <div class="stat-label">Bu kulübe ait etkinlik sayısı.</div>
+                  </div>
+
+                  <div class="stat-card">
+                    <div class="stat-label">Bekleyen Üyelik</div>
+                    <div id="pendingMembersValue" class="stat-value">0</div>
+                    <div class="stat-label">Onay bekleyen başvuru sayısı.</div>
                   </div>
                 </div>
               </div>
@@ -207,21 +214,35 @@
               <div class="card">
                 <div class="card-header">
                   <div>
-                    <div class="card-title">Üyeler</div>
-                    <div class="card-subtitle">
-                      Kulüp üyeleri buradan görüntülenip yönetilecek.
-                    </div>
+                    <div class="card-title">Üyelik İstekleri</div>
+                    <div class="card-subtitle">Onay bekleyen başvurular.</div>
                   </div>
                 </div>
-                <p
-                  style="
-                    font-size: 13px;
-                    color: var(--text-muted);
-                    margin-top: 8px;
-                  "
-                >
-                  Üye yönetimi sayfası geliştirme aşamasında.
-                </p>
+
+                <div id="pendingRequests">Yükleniyor…</div>
+              </div>
+
+              <div class="card" style="margin-top: 18px">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Tüm Üyeler</div>
+                    <div class="card-subtitle">
+                      Kulübünüzdeki tüm üyeler ve durumları.
+                    </div>
+                  </div>
+
+                  <div class="member-filter">
+                    <span>Filtre:</span>
+                    <select id="memberFilter">
+                      <option value="all">Tümü</option>
+                      <option value="beklemede">Beklemede</option>
+                      <option value="onaylandı">Onaylandı</option>
+                      <option value="reddedildi">Reddedildi</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div id="allMembers">Yükleniyor…</div>
               </div>
             </section>
           </main>

@@ -165,6 +165,42 @@ if (clubInfoDiv) {
   loadClub();
 }
 
+async function loadStats() {
+  const membersEl = document.getElementById("totalMembersValue");
+  const eventsEl = document.getElementById("totalEventsValue");
+  const pendingEl = document.getElementById("pendingMembersValue");
+
+  // Genel bakış kartı yoksa uğraşma
+  if (!membersEl && !eventsEl && !pendingEl) return;
+
+  try {
+    const res = await fetch(`${API}/club-admin/stats`, {
+      headers: { ...authHeader() },
+    });
+
+    if (res.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error("İstatistikler alınamadı.");
+    }
+
+    const data = await res.json();
+    if (membersEl) membersEl.textContent = data.total_members ?? 0;
+    if (eventsEl) eventsEl.textContent = data.total_events ?? 0;
+    if (pendingEl) pendingEl.textContent = data.pending_memberships ?? 0;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+const overviewExists = document.getElementById("page-overview");
+if (overviewExists) {
+  loadStats();
+}
+
 // ------- Kulüp bilgilerini güncelle -------
 
 if (clubForm) {
@@ -219,5 +255,175 @@ if (clubForm) {
         statusMsg.classList.add("status-error");
       }
     }
+  });
+}
+
+// ----------------------------
+// ÜYELİK LİSTELERİNİ YÜKLEME
+// ----------------------------
+let membersCache = [];
+
+function renderMemberTable(filterValue = "all") {
+  const allMembersBox = document.getElementById("allMembers");
+  if (!allMembersBox) return;
+
+  let filtered = membersCache;
+  if (filterValue !== "all") {
+    filtered = membersCache.filter((m) => m.status === filterValue);
+  }
+
+  if (filtered.length === 0) {
+    allMembersBox.innerHTML =
+      "<p style='color: var(--text-muted); font-size:13px;'>Bu filtreye uygun üye yok.</p>";
+    return;
+  }
+
+  const rows = filtered
+    .map((m) => {
+      let statusClass = "pending";
+      if (m.status === "onaylandı") statusClass = "approved";
+      else if (m.status === "reddedildi") statusClass = "rejected";
+
+      return `
+        <tr>
+          <td>${m.ogrenci_no}</td>
+          <td>${m.ad} ${m.soyad}</td>
+          <td>${m.email}</td>
+          <td>
+            <span class="status-badge ${statusClass}">
+              ${m.status}
+            </span>
+          </td>
+          <td>
+            <button
+              class="button-ghost btn-xs btn-danger"
+              onclick="removeMember(${m.uyelik_id})"
+            >
+              Üyeliği Sil
+            </button>
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  allMembersBox.innerHTML = `
+    <table class="member-table">
+      <thead>
+        <tr>
+          <th>Öğrenci No</th>
+          <th>Ad Soyad</th>
+          <th>Email</th>
+          <th>Durum</th>
+          <th>İşlem</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+async function loadMembershipData() {
+  if (!getToken()) return;
+
+  const pendingBox = document.getElementById("pendingRequests");
+  const filterSelect = document.getElementById("memberFilter");
+
+  try {
+    // --- Bekleyen istekler ---
+    const reqRes = await fetch(`${API}/club-admin/members/requests`, {
+      headers: { ...authHeader() },
+    });
+    const pending = await reqRes.json();
+
+    if (pendingBox) {
+      if (pending.length === 0) {
+        pendingBox.innerHTML =
+          "<p style='color: var(--text-muted); font-size:13px;'>Bekleyen başvuru yok.</p>";
+      } else {
+        pendingBox.innerHTML = pending
+          .map(
+            (m) => `
+          <div class="member-row">
+            <div class="member-info">
+              <div><strong>${m.ad} ${m.soyad}</strong> (${m.ogrenci_no})</div>
+              <div class="member-email">${m.email}</div>
+            </div>
+            <div class="member-actions">
+              <button class="button-primary btn-xs" onclick="approve(${m.uyelik_id})">
+                Onayla
+              </button>
+              <button class="button-ghost btn-xs" onclick="rejectReq(${m.uyelik_id})">
+                Reddet
+              </button>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+      }
+    }
+
+    // --- Tüm üyeler ---
+    const memRes = await fetch(`${API}/club-admin/members`, {
+      headers: { ...authHeader() },
+    });
+    membersCache = await memRes.json();
+
+    const currentFilter = filterSelect ? filterSelect.value : "all";
+    renderMemberTable(currentFilter);
+  } catch (e) {
+    console.error(e);
+    if (pendingBox)
+      pendingBox.innerHTML =
+        "<p style='color:red; font-size:13px;'>Üyelik verileri yüklenirken hata oluştu.</p>";
+  }
+}
+
+window.approve = async function (id) {
+  await fetch(`${API}/club-admin/members/${id}/approve`, {
+    method: "PUT",
+    headers: { ...authHeader() },
+  });
+  loadMembershipData();
+  loadStats(); // 👈 istatistikleri de yenile
+};
+
+window.rejectReq = async function (id) {
+  await fetch(`${API}/club-admin/members/${id}/reject`, {
+    method: "PUT",
+    headers: { ...authHeader() },
+  });
+  loadMembershipData();
+  loadStats();
+};
+
+window.removeMember = async function (id) {
+  const ok = confirm("Bu üyeyi kulüpten çıkarmak istediğine emin misin?");
+  if (!ok) return;
+
+  await fetch(`${API}/club-admin/members/${id}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+
+  loadMembershipData();
+  loadStats();
+};
+
+const membersTab = document.querySelector("[data-page='members']");
+if (membersTab) {
+  membersTab.addEventListener("click", () => {
+    loadMembershipData();
+  });
+}
+
+const filterSelect = document.getElementById("memberFilter");
+if (filterSelect) {
+  filterSelect.addEventListener("change", () => {
+    const value = filterSelect.value || "all";
+    renderMemberTable(value);
   });
 }
