@@ -119,7 +119,7 @@ class Membership(Base):
 # =============== EVENT TABLOSU ===============
 # event:
 #   etkinlikId (PK), kulupId (FK -> club.kulupId),
-#   ad, tarih
+#   ad, tarih, açıklama, fotoğraf
 class Event(Base):
     __tablename__ = "event"
 
@@ -127,6 +127,8 @@ class Event(Base):
     kulup_id = Column("kulupId", Integer, ForeignKey("club.kulupId"), nullable=False)
     name = Column("ad", String(200), nullable=False)
     datetime = Column("tarih", DateTime, nullable=False)
+    description = Column("aciklama", Text, nullable=True)
+    image_url = Column("foto", String(500), nullable=True)
 
     club = relationship("Club", back_populates="events")
     registrations = relationship(
@@ -134,6 +136,7 @@ class Event(Base):
         back_populates="event",
         cascade="all, delete-orphan",
     )
+
 
 
 # =============== EVENT_REG TABLOSU ===============

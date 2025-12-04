@@ -1,48 +1,59 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.webAPI_layer.schemas import EventCreate, EventPublic
-from app.data_access_layer.db import SessionLocal
+from datetime import datetime
+
+from app.webAPI_layer.deps import get_db, get_current_admin
 from app.data_access_layer import models
-from app.webAPI_layer.deps import get_current_user, require_admin_of_club, oauth2_scheme
+from app.webAPI_layer.schemas.club_admin import EventCreate, EventPublic
 
-router = APIRouter(prefix="/events", tags=["events"])
+router = APIRouter(
+    prefix="/club-admin/events",
+    tags=["club-admin-events"],
+)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@router.post("", response_model=EventPublic)
+def _get_admin_club(admin: models.ClubAdmin, db: Session) -> models.Club:
+    club = db.query(models.Club).filter(models.Club.admin_id == admin.hesap_id).first()
+    if not club:
+        raise HTTPException(status_code=404, detail="Bu admin'e ait kulüp bulunamadı.")
+    return club
+
+
+# --------- ETKİNLİK LİSTELEME -----------
+@router.get("/", response_model=list[EventPublic])
+def list_events(
+    admin=Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    club = _get_admin_club(admin, db)
+
+    events = (
+        db.query(models.Event)
+        .filter(models.Event.kulup_id == club.kulup_id)
+        .order_by(models.Event.datetime.asc())
+        .all()
+    )
+    return events
+
+
+# --------- ETKİNLİK OLUŞTURMA -----------
+@router.post("/", response_model=EventPublic)
 def create_event(
     payload: EventCreate,
+    admin=Depends(get_current_admin),
     db: Session = Depends(get_db),
-    _user = Depends(get_current_user),
-    token: str = Depends(oauth2_scheme),
 ):
-    require_admin_of_club(payload.club_id, token)
-    ev = models.Event(**payload.dict())
-    db.add(ev)
-    db.commit()
-    db.refresh(ev)
-    return ev
+    club = _get_admin_club(admin, db)
 
-@router.get("/{club_id}", response_model=list[EventPublic])
-def list_events(club_id: int, db: Session = Depends(get_db)):
-    return db.query(models.Event).filter_by(club_id=club_id).all()
-
-@router.delete("/{event_id}")
-def delete_event(
-    event_id: int,
-    db: Session = Depends(get_db),
-    _user = Depends(get_current_user),
-    token: str = Depends(oauth2_scheme),
-):
-    ev = db.query(models.Event).get(event_id)
-    if not ev:
-        raise HTTPException(404, "Bulunamadı")
-    require_admin_of_club(ev.club_id, token)
-    db.delete(ev)
+    event = models.Event(
+        kulup_id=club.kulup_id,
+        name=payload.name,
+        datetime=payload.datetime,
+        description=payload.description,
+        image_url=payload.image_url,
+    )
+    db.add(event)
     db.commit()
-    return {"ok": True}
+    db.refresh(event)
+    return event
+

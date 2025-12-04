@@ -6,12 +6,13 @@ from app.business_logic_layer.services.club_admin.auth_service import hash_passw
 
 
 def reset_and_seed():
-    # Tablolar yoksa oluştur
     models.Base.metadata.create_all(bind=engine)
-
     db = SessionLocal()
+
     try:
-        # --- TÜM VERİYİ TEMİZLE (FK sırasına dikkat) ---
+        # ============================
+        # TÜM TABLOLARI TEMİZLE
+        # ============================
         db.query(models.EventReg).delete()
         db.query(models.Event).delete()
         db.query(models.Membership).delete()
@@ -21,51 +22,62 @@ def reset_and_seed():
         db.query(models.Member).delete()
         db.commit()
 
-        # --- 3 ÜYE (member tablosu) ---
-        member1 = models.Member(
-            ogrenci_no="1001",
-            first_name="Ali",
-            last_name="Yılmaz",
-            email="ali@example.com",
-            password_hash=hash_password("ali123"),
-        )
-        member2 = models.Member(
-            ogrenci_no="1002",
-            first_name="Ayşe",
-            last_name="Demir",
-            email="ayse@example.com",
-            password_hash=hash_password("ayse123"),
-        )
-        member3 = models.Member(
-            ogrenci_no="1003",
-            first_name="Mehmet",
-            last_name="Kaya",
-            email="mehmet@example.com",
-            password_hash=hash_password("mehmet123"),
-        )
-        db.add_all([member1, member2, member3])
+        # ============================
+        # 1) 20 GERÇEKÇİ ÜYE
+        # ============================
+        member_data = [
+            ("2001", "Ahmet", "Korkmaz", "ahmet.korkmaz@uni.test", "ahmet123"),
+            ("2002", "Zeynep", "Aslan", "zeynep.aslan@uni.test", "zeynep123"),
+            ("2003", "Mert", "Demirci", "mert.demirci@uni.test", "mert123"),
+            ("2004", "Elif", "Aydın", "elif.aydin@uni.test", "elif123"),
+            ("2005", "Burak", "Taş", "burak.tas@uni.test", "burak123"),
+            ("2006", "Deniz", "Aksoy", "deniz.aksoy@uni.test", "deniz123"),
+            ("2007", "Beyza", "Keskin", "beyza.keskin@uni.test", "beyza123"),
+            ("2008", "Yusuf", "Güler", "yusuf.guler@uni.test", "yusuf123"),
+            ("2009", "Derya", "Öztürk", "derya.ozturk@uni.test", "derya123"),
+            ("2010", "Kerem", "Bulut", "kerem.bulut@uni.test", "kerem123"),
+            ("2011", "Seda", "Yalçın", "seda.yalcin@uni.test", "seda123"),
+            ("2012", "Okan", "Kaya", "okan.kaya@uni.test", "okan123"),
+            ("2013", "İrem", "Güneş", "irem.gunes@uni.test", "irem123"),
+            ("2014", "Can", "Kaplan", "can.kaplan@uni.test", "can123"),
+            ("2015", "Melisa", "Ergin", "melisa.ergin@uni.test", "melisa123"),
+            ("2016", "Ege", "Uçar", "ege.ucar@uni.test", "ege123"),
+            ("2017", "Selin", "Polat", "selin.polat@uni.test", "selin123"),
+            ("2018", "Oğuz", "Çağlar", "oguz.caglar@uni.test", "oguz123"),
+            ("2019", "Sinem", "Koç", "sinem.koc@uni.test", "sinem123"),
+            ("2020", "Barış", "Arslan", "baris.arslan@uni.test", "baris123"),
+        ]
+
+        members = []
+        for ogr_no, ad, soyad, email, sifre in member_data:
+            members.append(
+                models.Member(
+                    ogrenci_no=ogr_no,
+                    first_name=ad,
+                    last_name=soyad,
+                    email=email,
+                    password_hash=hash_password(sifre),
+                )
+            )
+        db.add_all(members)
         db.commit()
 
-        # --- 3 KULÜP ADMİNİ (club_admin tablosu) ---
-        admin1 = models.ClubAdmin(
-            email="admin1@uniclub.test",
-            password_hash=hash_password("admin1"),
-        )
-        admin2 = models.ClubAdmin(
-            email="admin2@uniclub.test",
-            password_hash=hash_password("admin2"),
-        )
-        admin3 = models.ClubAdmin(
-            email="admin3@uniclub.test",
-            password_hash=hash_password("admin3"),
-        )
+        # ============================
+        # 2) KULÜP ADMİNLERİ (3)
+        # ============================
+        admin1 = models.ClubAdmin(email="admin1@uniclub.test", password_hash=hash_password("admin1"))
+        admin2 = models.ClubAdmin(email="admin2@uniclub.test", password_hash=hash_password("admin2"))
+        admin3 = models.ClubAdmin(email="admin3@uniclub.test", password_hash=hash_password("admin3"))
+
         db.add_all([admin1, admin2, admin3])
         db.commit()
         db.refresh(admin1)
         db.refresh(admin2)
         db.refresh(admin3)
 
-        # --- 1 SÜPER ADMİN (super_admin tablosu) ---
+        # ============================
+        # 3) SÜPER ADMİN
+        # ============================
         super_admin = models.SuperAdmin(
             email="super@uniclub.test",
             password_hash=hash_password("superadmin"),
@@ -73,15 +85,17 @@ def reset_and_seed():
         db.add(super_admin)
         db.commit()
 
-        # --- 3 KULÜP (club tablosu) ---
+        # ============================
+        # 4) 3 KULÜP
+        # ============================
         club1 = models.Club(
             name="Bilgisayar Mühendisliği Kulübü",
             admin_id=admin1.hesap_id,
             email="bilmuh@uni.test",
             phone="0500 000 00 01",
-            description="Yazılım, donanım ve teknoloji odaklı kulüp.",
-            mission="Öğrencilerin yazılım ve donanım alanlarında kendini geliştirmesini sağlamak.",
-            vision="Üniversitenin en aktif teknoloji topluluğu olmak.",
+            description="Yazılım, donanım, siber güvenlik, yapay zeka çalışmaları.",
+            mission="Üniversitede teknoloji bilincini artırmak.",
+            vision="Türkiye'nin en üretken öğrenci teknoloji topluluğu olmak.",
             image_url="bilmuh.jpg",
         )
         club2 = models.Club(
@@ -89,9 +103,9 @@ def reset_and_seed():
             admin_id=admin2.hesap_id,
             email="fotograf@uni.test",
             phone="0500 000 00 02",
-            description="Fotoğraf çekmeyi sevenler için.",
-            mission="Fotoğrafçılık kültürünü yaymak ve üyelerin vizyonunu genişletmek.",
-            vision="Şehrin en yaratıcı fotoğraf topluluğu olmak.",
+            description="Fotoğraf çekimi, sergi hazırlama ve gezi organizasyonları.",
+            mission="Fotoğraf sanatını öğrencilere tanıtmak.",
+            vision="Ulusal yarışmalarda derece kazanan bir kulüp olmak.",
             image_url="fotograf.jpg",
         )
         club3 = models.Club(
@@ -99,105 +113,93 @@ def reset_and_seed():
             admin_id=admin3.hesap_id,
             email="muzik@uni.test",
             phone="0500 000 00 03",
-            description="Enstrüman ve vokal çalışmaları.",
-            mission="Müzikle ilgilenen öğrencileri bir araya getirmek.",
-            vision="Konser ve sahne performanslarında üniversiteyi temsil eden bir kulüp olmak.",
+            description="Enstrüman eğitimleri, sahne performansları, konser organizasyonları.",
+            mission="Öğrencilerin müzik yolculuğunu desteklemek.",
+            vision="Üniversitenin kültür-sanat etkinliklerinin merkezinde olmak.",
             image_url="muzik.jpg",
         )
+
         db.add_all([club1, club2, club3])
         db.commit()
-        db.refresh(club1)
-        db.refresh(club2)
-        db.refresh(club3)
 
-        # --- 5 ÜYELİK (membership tablosu) ---
-        # 1001: club1 + club3
-        # 1002: club1 + club2
-        # 1003: club2
-        mship1 = models.Membership(
-            kulup_id=club1.kulup_id,
-            ogrenci_id="1001",
-            status=models.STATUS_APPROVED,
-        )
-        mship2 = models.Membership(
-            kulup_id=club1.kulup_id,
-            ogrenci_id="1002",
-            status=models.STATUS_PENDING,
-        )
-        mship3 = models.Membership(
-            kulup_id=club2.kulup_id,
-            ogrenci_id="1002",
-            status=models.STATUS_APPROVED,
-        )
-        mship4 = models.Membership(
-            kulup_id=club2.kulup_id,
-            ogrenci_id="1003",
-            status=models.STATUS_REJECTED,
-        )
-        mship5 = models.Membership(
-            kulup_id=club3.kulup_id,
-            ogrenci_id="1001",
-            status=models.STATUS_PENDING,
-        )
-        db.add_all([mship1, mship2, mship3, mship4, mship5])
+        clubs = [club1, club2, club3]
+
+        # ============================
+        # 5) 20 ÜYELİK
+        # ============================
+        statuses = [models.STATUS_APPROVED, models.STATUS_PENDING, models.STATUS_REJECTED]
+
+        memberships = []
+        for i, m in enumerate(members):
+            memberships.append(
+                models.Membership(
+                    kulup_id=clubs[i % 3].kulup_id,
+                    ogrenci_id=m.ogrenci_no,
+                    status=statuses[i % 3],
+                )
+            )
+
+        db.add_all(memberships)
         db.commit()
 
-        # --- 2 ETKİNLİK (event tablosu) ---
+        # ============================
+        # 6) 20 ETKİNLİK
+        # ============================
         now = datetime.now()
-        event1 = models.Event(
-            kulup_id=club1.kulup_id,
-            name="Algoritma Çalıştayı",
-            datetime=now + timedelta(days=3),
-        )
-        event2 = models.Event(
-            kulup_id=club2.kulup_id,
-            name="Şehir Turu Fotoğraf Gezisi",
-            datetime=now + timedelta(days=7),
-        )
-        db.add_all([event1, event2])
-        db.commit()
-        db.refresh(event1)
-        db.refresh(event2)
+        events = []
 
-        # --- 5 ETKİNLİK KAYDI (event_reg tablosu) ---
-        # event1: 1001, 1002, 1003
-        # event2: 1001, 1003
-        reg1 = models.EventReg(
-            etkinlik_id=event1.etkinlik_id,
-            ogrenci_id="1001",
-            status=models.STATUS_APPROVED,
-        )
-        reg2 = models.EventReg(
-            etkinlik_id=event1.etkinlik_id,
-            ogrenci_id="1002",
-            status=models.STATUS_PENDING,
-        )
-        reg3 = models.EventReg(
-            etkinlik_id=event1.etkinlik_id,
-            ogrenci_id="1003",
-            status=models.STATUS_REJECTED,
-        )
-        reg4 = models.EventReg(
-            etkinlik_id=event2.etkinlik_id,
-            ogrenci_id="1001",
-            status=models.STATUS_APPROVED,
-        )
-        reg5 = models.EventReg(
-            etkinlik_id=event2.etkinlik_id,
-            ogrenci_id="1003",
-            status=models.STATUS_PENDING,
-        )
-        db.add_all([reg1, reg2, reg3, reg4, reg5])
+        event_templates = [
+            ("Python ile Veri Bilimi Atölyesi", "Makine öğrenmesi giriş eğitimi ve uygulama.", "python_event.jpg"),
+            ("Siber Güvenlik Capture The Flag", "Temel sızma testleri ve CTF yarışması.", "ctf.jpg"),
+            ("Drone Çekim Atölyesi", "Havadan çekim teknikleri ve uygulama gezisi.", "drone.jpg"),
+            ("Portre Çekim Workshop", "Model ile profesyonel portre çekim etkinliği.", "portrait.jpg"),
+            ("Açık Sahne Konseri", "Öğrenci gruplarının canlı performansları.", "konser.jpg"),
+            ("Gitar Eğitim Dersi", "Gitar teknikleri ve performans çalışmaları.", "gitar.jpg"),
+        ]
+
+        for i in range(20):
+            club = clubs[i % 3]
+            name, desc, img = event_templates[i % len(event_templates)]
+            ev = models.Event(
+                kulup_id=club.kulup_id,
+                name=f"{name} #{i+1}",
+                datetime=now + timedelta(days=i + 1),
+                description=desc,
+                image_url=img,
+            )
+            events.append(ev)
+
+        db.add_all(events)
         db.commit()
 
-        print("Örnek veriler başarıyla eklendi ✅")
-        print(f" - Üyeler: 3")
-        print(f" - Kulüp adminleri: 3")
-        print(f" - Süper admin: 1")
-        print(f" - Kulüpler: 3")
-        print(f" - Üyelikler: 5")
-        print(f" - Etkinlikler: 2")
-        print(f" - Etkinlik kayıtları: 5")
+        for ev in events:
+            db.refresh(ev)
+
+        # ============================
+        # 7) 20 ETKİNLİK KAYDI
+        # ============================
+        event_regs = []
+
+        for i in range(20):
+            event_obj = events[i]
+            ogr_no = members[i].ogrenci_no
+            status = statuses[(i + 1) % 3]
+            event_regs.append(
+                models.EventReg(
+                    etkinlik_id=event_obj.etkinlik_id,
+                    ogrenci_id=ogr_no,
+                    status=status,
+                )
+            )
+
+        db.add_all(event_regs)
+        db.commit()
+
+        print("Gerçekçi örnek veriler başarıyla eklendi! 🎉")
+        print(f" - Öğrenciler: {len(members)}")
+        print(f" - Üyelikler: {len(memberships)}")
+        print(f" - Etkinlikler: {len(events)}")
+        print(f" - Etkinlik kayıtları: {len(event_regs)}")
 
     finally:
         db.close()

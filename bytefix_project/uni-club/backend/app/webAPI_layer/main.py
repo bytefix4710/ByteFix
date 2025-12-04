@@ -5,6 +5,7 @@ from app.webAPI_layer.routers.club_admin import auth as club_admin_auth
 from app.webAPI_layer.routers.club_admin import club as club_admin_club
 from app.webAPI_layer.routers.club_admin import members as club_admin_members
 from app.webAPI_layer.routers.club_admin import stats as club_admin_stats
+from app.webAPI_layer.routers.club_admin import event as club_admin_events
 from app.webAPI_layer.routers.super_admin import auth as super_admin_auth
 from app.webAPI_layer.routers.super_admin import club as super_admin_club
 from app.webAPI_layer.routers.super_admin import stats as super_admin_stats
@@ -32,6 +33,7 @@ app.include_router(club_admin_auth.router)
 app.include_router(club_admin_club.router)
 app.include_router(club_admin_members.router)
 app.include_router(club_admin_stats.router)
+app.include_router(club_admin_events.router)
 
 # Süper admin routerları
 app.include_router(super_admin_auth.router)
