@@ -196,6 +196,39 @@ async function loadStats() {
   }
 }
 
+// ------- SAYFA YÖNLENDİRME -------
+
+function showPage(pageName) {
+  // Tüm sayfaları gizle
+  document.querySelectorAll(".page-view").forEach((view) => {
+    view.classList.remove("active");
+  });
+
+  // Tüm sidebar öğelerini pasif yap
+  document.querySelectorAll(".sidebar-item").forEach((item) => {
+    item.classList.remove("active");
+  });
+
+  // Seçilen sayfayı göster
+  const pageView = document.getElementById(`page-${pageName}`);
+  if (pageView) {
+    pageView.classList.add("active");
+  }
+
+  // Seçilen sidebar öğesini aktif yap
+  const sidebarItem = document.querySelector(`[data-page="${pageName}"]`);
+  if (sidebarItem) {
+    sidebarItem.classList.add("active");
+  }
+
+  // Sayfaya özel yükleme işlemleri
+  if (pageName === "overview") {
+    loadStats();
+  }
+}
+
+window.showPage = showPage;
+
 const overviewExists = document.getElementById("page-overview");
 if (overviewExists) {
   loadStats();
