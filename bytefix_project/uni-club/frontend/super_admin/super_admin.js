@@ -205,7 +205,7 @@ async function loadClubs() {
               (club) => `
             <div class="card" style="padding: 20px">
               <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px">
-                <div>
+                <div style="flex: 1">
                   <h3 style="margin: 0 0 8px 0">${club.name}</h3>
                   <p style="color: var(--text-muted); margin: 0; font-size: 14px">
                     ID: ${club.id} ${club.admin_id ? `| Admin ID: ${club.admin_id}` : ""}
@@ -220,7 +220,10 @@ async function loadClubs() {
                   </button>
                 </div>
               </div>
+              ${club.image_url ? `<div style="margin-bottom: 12px"><img src="${club.image_url}" alt="${club.name}" style="max-width: 100%; max-height: 200px; border-radius: var(--radius-md); object-fit: cover;" onerror="this.style.display='none'" /></div>` : ""}
               ${club.description ? `<p style="margin: 8px 0; color: var(--text-muted)">${club.description}</p>` : ""}
+              ${club.mission ? `<div style="margin-top: 12px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: var(--radius-md);"><strong style="color: var(--accent); font-size: 12px">Misyon:</strong><p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted)">${club.mission}</p></div>` : ""}
+              ${club.vision ? `<div style="margin-top: 8px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: var(--radius-md);"><strong style="color: var(--accent); font-size: 12px">Vizyon:</strong><p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted)">${club.vision}</p></div>` : ""}
               <div style="display: flex; gap: 16px; margin-top: 12px; font-size: 14px; color: var(--text-muted)">
                 ${club.email ? `<span>📧 ${club.email}</span>` : ""}
                 ${club.phone ? `<span>📞 ${club.phone}</span>` : ""}
@@ -252,7 +255,12 @@ function showCreateModal() {
     document.getElementById("clubEmailInput").value = "";
     document.getElementById("clubPhoneInput").value = "";
     document.getElementById("clubAdminIdInput").value = "";
+    document.getElementById("clubMissionInput").value = "";
+    document.getElementById("clubVisionInput").value = "";
+    document.getElementById("clubImageUrlInput").value = "";
     clubModal.style.display = "flex";
+    // Body scroll'unu engelle
+    document.body.style.overflow = "hidden";
   }
 }
 window.showCreateModal = showCreateModal;
@@ -260,6 +268,8 @@ window.showCreateModal = showCreateModal;
 function closeModal() {
   if (clubModal) {
     clubModal.style.display = "none";
+    // Body scroll'unu geri aç
+    document.body.style.overflow = "";
     const statusMsg = document.getElementById("statusMsg");
     if (statusMsg) {
       statusMsg.textContent = "";
@@ -301,7 +311,12 @@ async function editClub(clubId) {
       document.getElementById("clubEmailInput").value = club.email || "";
       document.getElementById("clubPhoneInput").value = club.phone || "";
       document.getElementById("clubAdminIdInput").value = club.admin_id || "";
+      document.getElementById("clubMissionInput").value = club.mission || "";
+      document.getElementById("clubVisionInput").value = club.vision || "";
+      document.getElementById("clubImageUrlInput").value = club.image_url || "";
       clubModal.style.display = "flex";
+      // Body scroll'unu engelle
+      document.body.style.overflow = "hidden";
     }
   } catch (err) {
     console.error(err);
@@ -366,6 +381,9 @@ if (clubForm) {
     const email = document.getElementById("clubEmailInput").value.trim();
     const phone = document.getElementById("clubPhoneInput").value.trim();
     const adminId = document.getElementById("clubAdminIdInput").value.trim();
+    const mission = document.getElementById("clubMissionInput").value.trim();
+    const vision = document.getElementById("clubVisionInput").value.trim();
+    const imageUrl = document.getElementById("clubImageUrlInput").value.trim();
 
     const payload = {
       name,
@@ -373,6 +391,9 @@ if (clubForm) {
       email: email || null,
       phone: phone || null,
       admin_id: adminId ? parseInt(adminId) : null,
+      mission: mission || null,
+      vision: vision || null,
+      image_url: imageUrl || null,
     };
 
     try {

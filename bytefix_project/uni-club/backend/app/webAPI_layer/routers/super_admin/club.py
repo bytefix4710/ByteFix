@@ -20,6 +20,9 @@ def get_all_clubs(super_admin=Depends(get_current_super_admin), db: Session = De
             email=club.email,
             phone=club.phone,
             admin_id=club.admin_id,
+            mission=club.mission,
+            vision=club.vision,
+            image_url=club.image_url,
         )
         for club in clubs
     ]
@@ -38,6 +41,9 @@ def get_club(club_id: int, super_admin=Depends(get_current_super_admin), db: Ses
         email=club.email,
         phone=club.phone,
         admin_id=club.admin_id,
+        mission=club.mission,
+        vision=club.vision,
+        image_url=club.image_url,
     )
 
 
@@ -55,6 +61,9 @@ def create_club(payload: ClubCreate, super_admin=Depends(get_current_super_admin
         email=payload.email,
         phone=payload.phone,
         admin_id=payload.admin_id,
+        mission=payload.mission,
+        vision=payload.vision,
+        image_url=payload.image_url,
     )
     db.add(club)
     db.commit()
@@ -67,6 +76,9 @@ def create_club(payload: ClubCreate, super_admin=Depends(get_current_super_admin
         email=club.email,
         phone=club.phone,
         admin_id=club.admin_id,
+        mission=club.mission,
+        vision=club.vision,
+        image_url=club.image_url,
     )
 
 
@@ -92,6 +104,12 @@ def update_club(club_id: int, payload: ClubUpdate, super_admin=Depends(get_curre
         club.phone = payload.phone
     if payload.admin_id is not None:
         club.admin_id = payload.admin_id
+    if payload.mission is not None:
+        club.mission = payload.mission
+    if payload.vision is not None:
+        club.vision = payload.vision
+    if payload.image_url is not None:
+        club.image_url = payload.image_url
 
     db.commit()
     db.refresh(club)
@@ -103,6 +121,9 @@ def update_club(club_id: int, payload: ClubUpdate, super_admin=Depends(get_curre
         email=club.email,
         phone=club.phone,
         admin_id=club.admin_id,
+        mission=club.mission,
+        vision=club.vision,
+        image_url=club.image_url,
     )
 
 

@@ -20,6 +20,9 @@ class ClubCreate(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     admin_id: Optional[int] = None
+    mission: Optional[str] = None
+    vision: Optional[str] = None
+    image_url: Optional[str] = None
 
 class ClubUpdate(BaseModel):
     name: Optional[str] = None
@@ -27,6 +30,9 @@ class ClubUpdate(BaseModel):
     email: Optional[str] = None
     phone: Optional[str] = None
     admin_id: Optional[int] = None
+    mission: Optional[str] = None
+    vision: Optional[str] = None
+    image_url: Optional[str] = None
 
 class ClubPublic(BaseModel):
     id: int
@@ -35,6 +41,9 @@ class ClubPublic(BaseModel):
     email: Optional[str]
     phone: Optional[str]
     admin_id: Optional[int]
+    mission: Optional[str]
+    vision: Optional[str]
+    image_url: Optional[str]
 
     class Config:
         orm_mode = True
