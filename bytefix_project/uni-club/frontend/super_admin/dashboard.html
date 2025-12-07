@@ -25,7 +25,7 @@
             >
               Ana Sayfa
             </button>
-            <button class="button-primary" onclick="logout()">Çıkış</button>
+            <button class="button-primary button-small" onclick="logout()">Çıkış</button>
           </nav>
         </header>
 
@@ -161,8 +161,8 @@
     </div>
 
     <!-- Kulüp Oluşturma/Güncelleme Modal -->
-    <div id="clubModal" class="modal" style="display: none">
-      <div class="modal-content">
+    <div id="clubModal" class="modal" style="display: none" onclick="if(event.target === this) closeModal()">
+      <div class="modal-content" onclick="event.stopPropagation()">
         <div class="card-header">
           <div>
             <div class="card-title" id="modalTitle">Yeni Kulüp</div>
@@ -170,7 +170,7 @@
               Kulüp bilgilerini gir.
             </div>
           </div>
-          <button class="button-ghost" onclick="closeModal()">✕</button>
+          <button class="button-ghost" onclick="closeModal()" style="padding: 4px 8px; min-width: auto">✕</button>
         </div>
 
         <form id="clubForm">
@@ -213,6 +213,31 @@
               type="number"
               id="clubAdminIdInput"
               placeholder="Kulüp admin ID'si"
+            />
+          </label>
+
+          <label>
+            <span class="label">Misyon</span>
+            <textarea
+              id="clubMissionInput"
+              placeholder="Kulübün misyonu"
+            ></textarea>
+          </label>
+
+          <label>
+            <span class="label">Vizyon</span>
+            <textarea
+              id="clubVisionInput"
+              placeholder="Kulübün vizyonu"
+            ></textarea>
+          </label>
+
+          <label>
+            <span class="label">Resim URL</span>
+            <input
+              type="text"
+              id="clubImageUrlInput"
+              placeholder="resim.jpg veya https://..."
             />
           </label>
 
