@@ -8,6 +8,7 @@
   <body>
     <div class="page-root">
       <div class="app-shell">
+        <!-- HEADER -->
         <header class="app-header">
           <div class="app-title-block">
             <div class="app-title">
@@ -29,24 +30,28 @@
           </nav>
         </header>
 
+        <!-- SOL MENU + ANA İÇERİK -->
         <div class="dashboard-layout">
+          <!-- Sidebar -->
           <aside class="sidebar">
-            <div class="sidebar-item active" data-page="overview">
+            <div class="sidebar-item active" data-page="overview" onclick="showPage('overview')">
               🏠 Genel Bakış
             </div>
-            <div class="sidebar-item" data-page="clubs">
+            <div class="sidebar-item" data-page="clubs" onclick="showPage('clubs')">
               🏛 Kulüpler
             </div>
-            <div class="sidebar-item" data-page="events">
+            <div class="sidebar-item" data-page="events" onclick="showPage('events')">
               📅 Etkinlikler
             </div>
-            <div class="sidebar-item" data-page="profile">
+            <div class="sidebar-item" data-page="profile" onclick="showPage('profile')">
               👤 Profilim
             </div>
           </aside>
 
+          <!-- ANA CONTENT -->
           <main class="dashboard-content">
-            
+
+            <!-- ================= GENEL BAKIŞ ================= -->
             <section id="page-overview" class="page-view active">
               <div class="card">
                 <div class="card-header">
@@ -59,6 +64,7 @@
                   <span id="userEmailBadge" class="chip">(Yükleniyor...)</span>
                 </div>
 
+                <!-- Üstte: istatistik kartları -->
                 <div
                   style="
                     display: grid;
@@ -70,29 +76,73 @@
                   <div class="stat-card">
                     <div class="stat-label">Üye Olduğum Kulüpler</div>
                     <div class="stat-value" id="statClubsCount">-</div>
+                    <div class="stat-sublist" id="statClubsList"></div>
                   </div>
-                  <div class="stat-card">
-                    <div class="stat-label">Katıldığım Etkinlikler</div>
-                    <div class="stat-value" id="statEventsCount">-</div>
-                  </div>
-                </div>
-              </div>
 
-              <div class="card" style="margin-top: 18px">
-                <div class="card-header">
-                  <div>
-                    <div class="card-title">Duyurular</div>
-                    <div class="card-subtitle">
-                      Kulüplerden gelen son haberler.
-                    </div>
+                  <div class="stat-card">
+                    <div class="stat-label">Başvuru Sürecindeki Kulüpler</div>
+                    <div class="stat-value" id="statPendingCount">-</div>
+                    <div class="stat-sublist" id="statPendingList"></div>
                   </div>
                 </div>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">
-                  Henüz yeni bir duyuru yok.
-                </p>
+
+                <!-- Altta: duyurular + etkinlikler, aynı kartın içinde -->
+                <div
+                  class="overview-bottom-row"
+                  style="
+                    margin-top: 18px;
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 16px;
+                  "
+                >
+                  <!-- Duyurular -->
+                  <div class="card">
+                    <div class="card-header">
+                      <div>
+                        <div class="card-title">Duyurular</div>
+                        <div class="card-subtitle">
+                          Kulüplerden gelen son haberler.
+                        </div>
+                      </div>
+                    </div>
+                    <p
+                      style="
+                        font-size: 13px;
+                        color: var(--text-muted);
+                        margin-top: 8px;
+                      "
+                    >
+                      Henüz yeni bir duyuru yok.
+                    </p>
+                  </div>
+
+                  <!-- Etkinlikler -->
+                  <div class="card">
+                    <div class="card-header">
+                      <div>
+                        <div class="card-title">Etkinlikler</div>
+                        <div class="card-subtitle">
+                          Yaklaşan veya kayıt olabileceğin etkinlikler.
+                        </div>
+                      </div>
+                    </div>
+                    <p
+                      id="overviewEventsPlaceholder"
+                      style="
+                        font-size: 13px;
+                        color: var(--text-muted);
+                        margin-top: 8px;
+                      "
+                    >
+                      Yakında katılabileceğin etkinlikler burada görünecek.
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
 
+            <!-- ================= KULÜPLER ================= -->
             <section id="page-clubs" class="page-view">
               <div class="card">
                 <div class="card-header">
@@ -104,11 +154,61 @@
                   </div>
                 </div>
                 <div id="clubListContainer" style="margin-top: 10px;">
-                    Yükleniyor...
+                  Yükleniyor...
+                </div>
+              </div>
+
+              <!-- Kulüp Detay Modalı -->
+              <div id="clubDetailModal" class="modal-overlay" style="display:none;">
+                <div class="modal-card">
+                  <button class="modal-close" id="btnCloseClubModal">×</button>
+
+                  <div class="card-header" style="margin-bottom: 8px;">
+                    <div>
+                      <div class="card-title" id="clubDetailName">Kulüp Detayı</div>
+                      <div class="card-subtitle">
+                        Kulüp hakkında detaylı bilgi ve üyelik işlemleri.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-body">
+                    <!-- Sol taraf: kulüp bilgileri -->
+                    <div class="modal-info">
+                      <p><span class="label">Açıklama:</span> <span id="clubDetailDescription"></span></p>
+                      <p><span class="label">E-posta:</span> <span id="clubDetailEmail"></span></p>
+                      <p><span class="label">Telefon:</span> <span id="clubDetailPhone"></span></p>
+                      <p><span class="label">Misyon:</span> <span id="clubDetailMission"></span></p>
+                      <p><span class="label">Vizyon:</span> <span id="clubDetailVision"></span></p>
+
+                      <div class="club-actions-row">
+                        <button id="btnJoinClub" class="button-primary">
+                          Üye Ol
+                        </button>
+                        <button
+                          id="btnCancelMembership"
+                          class="button-ghost button-small"
+                          style="display:none;"
+                        >
+                          Başvuruyu Geri Çek
+                        </button>
+                        <div id="clubJoinMessage" class="club-action-message"></div>
+                      </div>
+                    </div>
+
+                    <!-- Sağ taraf: fotoğraflar -->
+                    <div class="modal-photos">
+                      <div class="label" style="margin-bottom: 6px;">Etkinlik Fotoğrafları</div>
+                      <div id="clubDetailPhotos" class="club-photos-grid">
+                        <!-- JS ile doldurulacak -->
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
 
+            <!-- ================= ETKİNLİKLER ================= -->
             <section id="page-events" class="page-view">
               <div class="card">
                 <div class="card-header">
@@ -125,84 +225,81 @@
               </div>
             </section>
 
-            <section id="page-profile" class="page-view">
-              <div class="card">
-                <div class="card-header">
-                  <div>
-                    <div class="card-title">Profil Bilgileri</div>
-                    <div class="card-subtitle">
-                      Kişisel bilgilerini buradan güncelleyebilirsin.
-                    </div>
-                  </div>
-                </div>
+           <section id="page-profile" class="page-view">
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Profil Bilgileri</div>
+        <div class="card-subtitle">
+          Kişisel bilgilerini buradan güncelleyebilirsin.
+        </div>
+      </div>
+    </div>
 
-                <div id="profileInfo">Profil yükleniyor...</div>
-              </div>
+    <!-- Üstte sadece özet bilgi -->
+    <div id="profileInfo" style="margin-bottom: 20px;">Profil yükleniyor...</div>
 
-              <div class="card" style="margin-top: 18px">
-                <div class="card-header">
-                    <div>
-                      <div class="card-title">Bilgileri Güncelle</div>
-                    </div>
-                </div>
+    <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 10px 0 18px 0;" />
 
-                <form id="profileForm">
-                    <label>
-                        <span class="label">Öğrenci No (Değiştirilemez)</span>
-                        <input type="text" id="profileOgrenciNo" disabled style="opacity: 0.6;" />
-                    </label>
+    <!-- Aynı kartın içinde form -->
+    <div>
+      <div class="card-title" style="font-size: 15px; margin-bottom: 10px;">
+        Bilgileri Güncelle
+      </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <label>
-                            <span class="label">Ad</span>
-                            <input type="text" id="profileName" />
-                        </label>
-                        <label>
-                            <span class="label">Soyad</span>
-                            <input type="text" id="profileSurname" />
-                        </label>
-                    </div>
+      <form id="profileForm">
+        <label>
+          <span class="label">Öğrenci No (Değiştirilemez)</span>
+          <input type="text" id="profileOgrenciNo" disabled style="opacity: 0.6;" />
+        </label>
 
-                    <label>
-                        <span class="label">E-posta</span>
-                        <input type="email" id="profileEmail" />
-                    </label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <label>
+            <span class="label">Ad</span>
+            <input type="text" id="profileName" />
+          </label>
+          <label>
+            <span class="label">Soyad</span>
+            <input type="text" id="profileSurname" />
+          </label>
+        </div>
 
-                    <button type="submit" class="button-primary" style="justify-content: center">
-                        Güncelle
-                    </button>
-                    <div id="statusMsg" class="status-success"></div>
-                </form>
-              </div>
-            </section>
+        <label>
+          <span class="label">E-posta</span>
+          <input type="email" id="profileEmail" />
+        </label>
+
+        <button type="submit" class="button-primary" style="justify-content: center">
+          Güncelle
+        </button>
+        <div id="statusMsg" class="status-success"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
 
           </main>
         </div>
       </div>
     </div>
 
+    <!-- JS -->
     <script src="user.js"></script>
-
     <script>
-      const sidebarItems = document.querySelectorAll(".sidebar-item");
-      const pages = document.querySelectorAll(".page-view");
-
-      sidebarItems.forEach((item) => {
+      // Sidebar tıklamalarında sadece showPage çağırıyoruz.
+      // Aktiflik ve sayfa geçişini user.js içindeki showPage hallediyor.
+      document.querySelectorAll(".sidebar-item").forEach((item) => {
         item.addEventListener("click", () => {
           const target = item.getAttribute("data-page");
+          if (typeof showPage === "function") {
+            showPage(target);
+          }
 
-          // Sidebar aktifliği
-          sidebarItems.forEach((i) => i.classList.remove("active"));
-          item.classList.add("active");
-
-          // Sayfa görünürlüğü
-          pages.forEach((page) => {
-            if (page.id === "page-" + target) {
-              page.classList.add("active");
-            } else {
-              page.classList.remove("active");
-            }
-          });
+          // Kulüpler sekmesine geçince listeyi tazelemek istersen:
+          if (target === "clubs" && typeof loadClubs === "function") {
+            loadClubs();
+          }
         });
       });
     </script>

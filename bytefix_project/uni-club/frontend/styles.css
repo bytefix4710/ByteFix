@@ -658,3 +658,227 @@ textarea {
     padding: 16px;
   }
 }
+/* Kulüp Detay butonu */
+.club-detail-btn {
+  cursor: pointer;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  background: #1f2937;          /* koyu gri */
+  color: #e5e7eb;
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.4);
+  transition:
+    background-color 0.18s ease,
+    transform 0.15s ease,
+    box-shadow 0.18s ease;
+}
+
+.club-detail-btn:hover {
+  background: #6366f1;          /* morumsu */
+  color: #f9fafb;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow:
+    0 8px 18px rgba(99, 102, 241, 0.35),
+    0 0 0 1px rgba(129, 140, 248, 0.7);
+}
+
+/* Üye olduğum / başvuru sürecindeki kulüpler listesi */
+.stat-sublist {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: left;
+  padding-left: 12px;
+}
+
+.stat-sublist ul {
+  margin: 0;
+  padding-left: 14px;
+}
+
+.stat-sublist li {
+  margin-bottom: 3px;
+}
+/* ==== Üye paneli kulüp detay modalı ==== */
+
+/* Karanlık arka plan */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Kartın kendisi */
+.modal-card {
+  position: relative;
+  width: min(900px, 95vw);
+  background: radial-gradient(
+      circle at top left,
+      rgba(30, 64, 175, 0.18),
+      transparent 55%
+    ),
+    #020617;
+  border-radius: 18px;
+  padding: 22px 24px 20px;
+  box-shadow:
+    0 24px 55px rgba(15, 23, 42, 0.95),
+    0 0 0 1px rgba(148, 163, 184, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* X kapatma butonu */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.modal-close:hover {
+  color: #f9fafb;
+  transform: scale(1.12);
+}
+
+/* İç layout: solda yazılar, sağda fotoğraflar */
+.modal-body {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .modal-card {
+    padding: 18px;
+  }
+  
+  .modal-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fotoğraf alanı */
+.club-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.club-photos-grid img {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #020617;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* Üye ol / başvuruyu geri çek butonları satırı */
+.club-actions-row {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Modal içindeki mesaj (butonların ALTINDA) */
+.club-action-message {
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ===========================
+   Üye paneli ana kart genişlik düzeltmesi
+   =========================== */
+
+/* Dashboard içindeki tüm kartlar, sütunun tamamını kaplasın */
+.dashboard-content .card {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Genel Bakış sayfası üst satır (Üye olduğum / Başvuru sürecindeki kulüpler) */
+#page-overview .overview-top-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* Genel Bakış sayfası alt satır (Duyurular + Etkinlikler) */
+#page-overview .overview-bottom-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+/* ===== MEMBER PANEL GENEL DÜZELTMELERİ ===== */
+
+/* Dashboard içindeki tüm kartlar tam genişlikte olsun */
+.dashboard-content > .card,
+.dashboard-content > section > .card {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Genel bakış, kulüpler, etkinlikler, profil sayfalarında
+   kartları sola yaslı ve tam genişlik yap */
+#page-overview .card,
+#page-clubs .card,
+#page-events .card,
+#page-profile .card {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Genel bakış alt satır (Duyurular + Etkinlikler) için
+   kartların yan yana düzgün oturması */
+#page-overview .overview-bottom-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Küçük ekranlarda alt kartlar alta geçsin */
+@media (max-width: 768px) {
+  #page-overview .overview-bottom-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ==== DASHBOARD GENİŞLİK FIX ==== */
+
+/* Sağ taraftaki content alanı sidebar'dan kalan kısmın tamamını kullansın */
+.dashboard-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Her page-view satırı tam genişlikte olsun */
+.page-view {
+  width: 100%;
+}
+
+/* Page-view içindeki kartlar sağa kadar uzasın */
+.page-view > .card {
+  width: 100%;
+  max-width: 100%;
+}

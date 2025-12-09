@@ -26,27 +26,28 @@ def reset_and_seed():
         # 1) 20 GERÇEKÇİ ÜYE
         # ============================
         member_data = [
-            ("2001", "Ahmet", "Korkmaz", "ahmet.korkmaz@uni.test", "ahmet123"),
-            ("2002", "Zeynep", "Aslan", "zeynep.aslan@uni.test", "zeynep123"),
-            ("2003", "Mert", "Demirci", "mert.demirci@uni.test", "mert123"),
-            ("2004", "Elif", "Aydın", "elif.aydin@uni.test", "elif123"),
-            ("2005", "Burak", "Taş", "burak.tas@uni.test", "burak123"),
-            ("2006", "Deniz", "Aksoy", "deniz.aksoy@uni.test", "deniz123"),
-            ("2007", "Beyza", "Keskin", "beyza.keskin@uni.test", "beyza123"),
-            ("2008", "Yusuf", "Güler", "yusuf.guler@uni.test", "yusuf123"),
-            ("2009", "Derya", "Öztürk", "derya.ozturk@uni.test", "derya123"),
-            ("2010", "Kerem", "Bulut", "kerem.bulut@uni.test", "kerem123"),
-            ("2011", "Seda", "Yalçın", "seda.yalcin@uni.test", "seda123"),
-            ("2012", "Okan", "Kaya", "okan.kaya@uni.test", "okan123"),
-            ("2013", "İrem", "Güneş", "irem.gunes@uni.test", "irem123"),
-            ("2014", "Can", "Kaplan", "can.kaplan@uni.test", "can123"),
-            ("2015", "Melisa", "Ergin", "melisa.ergin@uni.test", "melisa123"),
-            ("2016", "Ege", "Uçar", "ege.ucar@uni.test", "ege123"),
-            ("2017", "Selin", "Polat", "selin.polat@uni.test", "selin123"),
-            ("2018", "Oğuz", "Çağlar", "oguz.caglar@uni.test", "oguz123"),
-            ("2019", "Sinem", "Koç", "sinem.koc@uni.test", "sinem123"),
-            ("2020", "Barış", "Arslan", "baris.arslan@uni.test", "baris123"),
-        ]
+    ("2001", "Ahmet", "Korkmaz", "ahmet.korkmaz@uni.com", "ahmet123"),
+    ("2002", "Zeynep", "Aslan", "zeynep.aslan@uni.com", "zeynep123"),
+    ("2003", "Mert", "Demirci", "mert.demirci@uni.com", "mert123"),
+    ("2004", "Elif", "Aydın", "elif.aydin@uni.com", "elif123"),
+    ("2005", "Burak", "Taş", "burak.tas@uni.com", "burak123"),
+    ("2006", "Deniz", "Aksoy", "deniz.aksoy@uni.com", "deniz123"),
+    ("2007", "Beyza", "Keskin", "beyza.keskin@uni.com", "beyza123"),
+    ("2008", "Yusuf", "Güler", "yusuf.guler@uni.com", "yusuf123"),
+    ("2009", "Derya", "Öztürk", "derya.ozturk@uni.com", "derya123"),
+    ("2010", "Kerem", "Bulut", "kerem.bulut@uni.com", "kerem123"),
+    ("2011", "Seda", "Yalçın", "seda.yalcin@uni.com", "seda123"),
+    ("2012", "Okan", "Kaya", "okan.kaya@uni.com", "okan123"),
+    ("2013", "İrem", "Güneş", "irem.gunes@uni.com", "irem123"),
+    ("2014", "Can", "Kaplan", "can.kaplan@uni.com", "can123"),
+    ("2015", "Melisa", "Ergin", "melisa.ergin@uni.com", "melisa123"),
+    ("2016", "Ege", "Uçar", "ege.ucar@uni.com", "ege123"),
+    ("2017", "Selin", "Polat", "selin.polat@uni.com", "selin123"),
+    ("2018", "Oğuz", "Çağlar", "oguz.caglar@uni.com", "oguz123"),
+    ("2019", "Sinem", "Koç", "sinem.koc@uni.com", "sinem123"),
+    ("2020", "Barış", "Arslan", "baris.arslan@uni.com", "baris123"),
+]
+
 
         members = []
         for ogr_no, ad, soyad, email, sifre in member_data:
