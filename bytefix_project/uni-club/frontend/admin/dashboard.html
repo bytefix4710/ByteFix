@@ -20,13 +20,12 @@
             </div>
           </div>
           <nav class="app-nav">
-            <button
-              class="button-ghost"
-              onclick="showPage('overview')"
-            >
+            <button class="button-ghost" onclick="showPage('overview')">
               Ana Sayfa
             </button>
-            <button class="button-primary button-small" onclick="logout()">Çıkış</button>
+            <button class="button-primary button-small" onclick="logout()">
+              Çıkış
+            </button>
           </nav>
         </header>
 
@@ -38,12 +37,8 @@
               🏠 Ana Sayfa
             </div>
             <div class="sidebar-item" data-page="club">🏛 Kulüp Bilgileri</div>
-            <div class="sidebar-item" data-page="events">
-              📅 Etkinlikler (yakında)
-            </div>
-            <div class="sidebar-item" data-page="members">
-              👥 Üyeler (yakında)
-            </div>
+            <div class="sidebar-item" data-page="events">📅 Etkinlikler</div>
+            <div class="sidebar-item" data-page="members">👥 Üyeler</div>
           </aside>
 
           <!-- İçerik -->
@@ -189,70 +184,183 @@
             <!-- ETKİNLİKLER -->
             <section id="page-events" class="page-view">
               <div class="card">
-                <div class="card-header">
+                <div
+                  class="card-header"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
                   <div>
                     <div class="card-title">Etkinliklerim</div>
                     <div class="card-subtitle">
                       Kulübüne ait etkinlikleri görüntüleyebilirsin.
                     </div>
                   </div>
+
+                  <button
+                    class="button-primary btn-xs"
+                    onclick="openCreateEventModal()"
+                    style="white-space: nowrap"
+                  >
+                    + Etkinlik Oluştur
+                  </button>
                 </div>
 
                 <div id="eventsList">Etkinlikler yükleniyor...</div>
               </div>
 
-              <div class="card" style="margin-top: 18px">
-                <div class="card-header">
-                  <div>
-                    <div class="card-title">Yeni Etkinlik Oluştur</div>
-                    <div class="card-subtitle">
-                      Ad ve tarih belirleyerek yeni bir etkinlik ekleyebilirsin.
+              <!-- Etkinlik Düzenleme Modal -->
+              <div id="editEventModal" class="modal" style="display: none">
+                <div class="modal-content">
+                  <div class="card-header" style="margin-bottom: 10px">
+                    <div>
+                      <div class="card-title">Etkinliği Düzenle</div>
+                      <div class="card-subtitle">
+                        Bilgileri güncelle ve kaydet.
+                      </div>
                     </div>
+                    <button
+                      class="button-ghost btn-xs"
+                      onclick="closeEditEventModal()"
+                    >
+                      Kapat
+                    </button>
                   </div>
+
+                  <form id="editEventForm">
+                    <input type="hidden" id="editEventId" />
+
+                    <label>
+                      <span class="label">Etkinlik Adı</span>
+                      <input id="editEventName" type="text" required />
+                    </label>
+
+                    <label>
+                      <span class="label">Tarih ve Saat</span>
+                      <input
+                        id="editEventDate"
+                        type="datetime-local"
+                        required
+                      />
+                    </label>
+
+                    <label>
+                      <span class="label">Açıklama</span>
+                      <textarea id="editEventDesc"></textarea>
+                    </label>
+
+                    <label>
+                      <span class="label">Fotoğraf (URL/dosya)</span>
+                      <input id="editEventImage" type="text" />
+                    </label>
+
+                    <button
+                      type="submit"
+                      class="button-primary"
+                      style="justify-content: center"
+                    >
+                      Kaydet
+                    </button>
+
+                    <div
+                      id="editEventMsg"
+                      style="margin-top: 6px; font-size: 12px"
+                    ></div>
+                  </form>
                 </div>
+              </div>
 
-                <form id="eventForm">
-                  <label>
-                    <span class="label">Etkinlik Adı</span>
-                    <input
-                      type="text"
-                      id="eventNameInput"
-                      placeholder="Örn: Algoritma Çalıştayı"
-                      required
-                    />
-                  </label>
+              <!-- Etkinlik Oluşturma Modal -->
+              <div id="createEventModal" class="modal" style="display: none">
+                <div class="modal-content">
+                  <div class="card-header" style="margin-bottom: 10px">
+                    <div>
+                      <div class="card-title">Yeni Etkinlik Oluştur</div>
+                      <div class="card-subtitle">
+                        Kulübün için yeni bir etkinlik ekle.
+                      </div>
+                    </div>
+                    <button
+                      class="button-ghost btn-xs"
+                      onclick="closeCreateEventModal()"
+                    >
+                      Kapat
+                    </button>
+                  </div>
 
-                  <label>
-                    <span class="label">Tarih ve Saat</span>
-                    <input type="datetime-local" id="eventDateInput" required />
-                  </label>
+                  <form id="createEventForm">
+                    <label>
+                      <span class="label">Etkinlik Adı</span>
+                      <input id="createEventName" type="text" required />
+                    </label>
 
-                  <label>
-                    <span class="label">Açıklama</span>
-                    <textarea
-                      id="eventDescInput"
-                      placeholder="Etkinliğin içeriğini kısaca anlatın."
-                    ></textarea>
-                  </label>
+                    <label>
+                      <span class="label">Tarih ve Saat</span>
+                      <input
+                        id="createEventDate"
+                        type="datetime-local"
+                        required
+                      />
+                    </label>
 
-                  <label>
-                    <span class="label">Fotoğraf (URL veya dosya adı)</span>
-                    <input
-                      type="text"
-                      id="eventImageInput"
-                      placeholder="örnek: algoritma.jpg veya https://..."
-                    />
-                  </label>
+                    <label>
+                      <span class="label">Açıklama</span>
+                      <textarea id="createEventDesc"></textarea>
+                    </label>
 
-                  <button
-                    type="submit"
-                    class="button-primary"
-                    style="justify-content: center"
-                  >
-                    Oluştur
-                  </button>
-                  <div id="eventStatusMsg" class="status-success"></div>
-                </form>
+                    <label>
+                      <span class="label">Fotoğraf (dosya adı / URL)</span>
+                      <input id="createEventImage" type="text" />
+                    </label>
+
+                    <button
+                      type="submit"
+                      class="button-primary"
+                      style="justify-content: center"
+                    >
+                      Oluştur
+                    </button>
+
+                    <div
+                      id="createEventMsg"
+                      style="margin-top: 6px; font-size: 12px"
+                    ></div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Katılım Kayıtları Modal -->
+              <div id="regsModal" class="modal" style="display: none">
+                <div class="modal-content">
+                  <div class="card-header" style="margin-bottom: 10px">
+                    <div>
+                      <div class="card-title">Etkinlik Kayıtları</div>
+                      <div id="regsSubtitle" class="card-subtitle">
+                        Katılım talepleri
+                      </div>
+                    </div>
+                    <button
+                      class="button-ghost btn-xs"
+                      onclick="closeRegsModal()"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+
+                  <div class="member-filter" style="margin-bottom: 10px">
+                    <span>Filtre:</span>
+                    <select id="regsFilter">
+                      <option value="all">Tümü</option>
+                      <option value="beklemede">Beklemede</option>
+                      <option value="onaylandı">Onaylandı</option>
+                      <option value="reddedildi">Reddedildi</option>
+                    </select>
+                  </div>
+
+                  <div id="regsList">Yükleniyor...</div>
+                </div>
               </div>
             </section>
 

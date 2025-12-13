@@ -464,6 +464,20 @@ if (filterSelect) {
 // ----------------------------
 // ETKİNLİKLERİ YÜKLEME
 // ----------------------------
+let eventsCache = [];
+
+function toDatetimeLocalValue(isoString) {
+  // FastAPI datetime ISO -> input[type=datetime-local] format
+  const d = new Date(isoString);
+  const pad = (n) => String(n).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+}
+
 async function loadEvents() {
   const eventsBox = document.getElementById("eventsList");
   if (!eventsBox) return;
@@ -473,58 +487,388 @@ async function loadEvents() {
       headers: { ...authHeader() },
     });
 
-    if (res.status === 401) {
-      logout();
-      return;
-    }
+    if (res.status === 401) return logout();
+    if (!res.ok) throw new Error("Etkinlikler alınamadı.");
 
-    if (!res.ok) {
-      throw new Error("Etkinlikler alınamadı.");
-    }
+    eventsCache = await res.json();
 
-    const events = await res.json();
-
-    if (events.length === 0) {
+    if (eventsCache.length === 0) {
       eventsBox.innerHTML =
         "<p style='color: var(--text-muted); font-size:13px;'>Henüz etkinlik yok.</p>";
       return;
     }
 
-    eventsBox.innerHTML = events
+    eventsBox.innerHTML = `
+  <div class="events-grid">
+    ${eventsCache
       .map((e) => {
-        const dt = new Date(e.datetime);
-        const formatted = dt.toLocaleString("tr-TR");
-        const desc = e.description || "";
-        const img = e.image_url || "";
+        const formatted = new Date(e.datetime).toLocaleString("tr-TR");
+        const desc = (e.description || "").trim();
+        const img = (e.image_url || "").trim();
 
         return `
-          <div class="member-row" style="margin-bottom:10px;">
-            <div class="member-info">
-              <div><strong>${e.name}</strong></div>
-              <div class="member-email">${formatted}</div>
-              ${
-                desc
-                  ? `<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${desc}</div>`
-                  : ""
-              }
-              ${
-                img
-                  ? `<div style="font-size:11px; color:var(--text-muted); margin-top:3px;">
-                       Fotoğraf: <code>${img}</code>
-                     </div>`
-                  : ""
-              }
+          <div class="event-card">
+            <div class="event-card-inner">
+              <div>
+                <h3 class="event-title">${e.name}</h3>
+
+                <div class="event-meta">
+                  <span class="event-date">${formatted}</span>
+                </div>
+
+                ${
+                  desc
+                    ? `<p class="event-desc">${desc}</p>`
+                    : `<p class="event-desc" style="color: var(--text-muted);">(Açıklama yok)</p>`
+                }
+
+                <div class="event-foot">
+                  ${
+                    img
+                      ? `<span>Foto: <code>${img}</code></span>`
+                      : `<span style="opacity:.75;">Foto yok</span>`
+                  }
+                </div>
+              </div>
+
+              <div class="event-actions">
+                <button class="button-ghost" onclick="openRegsModal(${
+                  e.etkinlik_id
+                })">
+                  Kayıtlar
+                </button>
+                <button class="button-primary" onclick="openEditEventModal(${
+                  e.etkinlik_id
+                })">
+                  Düzenle
+                </button>
+                <button class="button-ghost btn-danger" onclick="deleteEvent(${
+                  e.etkinlik_id
+                })">
+                  Sil
+                </button>
+              </div>
             </div>
           </div>
         `;
       })
-      .join("");
+      .join("")}
+  </div>
+  `;
   } catch (err) {
     console.error(err);
     eventsBox.innerHTML =
       "<p style='color:red; font-size:13px;'>Etkinlikler yüklenirken hata oluştu.</p>";
   }
 }
+
+window.deleteEvent = async function (eventId) {
+  const ok = confirm(
+    "Bu etkinliği silmek istediğine emin misin? (Kayıtlar da silinir)"
+  );
+  if (!ok) return;
+
+  const res = await fetch(`${API}/club-admin/events/${eventId}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+
+  if (res.status === 401) return logout();
+  if (!res.ok) {
+    alert("Etkinlik silinemedi.");
+    return;
+  }
+
+  loadEvents();
+  loadStats();
+};
+
+window.openCreateEventModal = function () {
+  const modal = document.getElementById("createEventModal");
+  if (!modal) return;
+
+  document.getElementById("createEventForm").reset();
+  document.getElementById("createEventMsg").textContent = "";
+
+  modal.style.display = "flex";
+};
+
+window.closeCreateEventModal = function () {
+  const modal = document.getElementById("createEventModal");
+  if (modal) modal.style.display = "none";
+};
+
+window.openEditEventModal = function (eventId) {
+  const modal = document.getElementById("editEventModal");
+  if (!modal) return;
+
+  const ev = eventsCache.find((x) => x.etkinlik_id === eventId);
+  if (!ev) return;
+
+  document.getElementById("editEventId").value = ev.etkinlik_id;
+  document.getElementById("editEventName").value = ev.name || "";
+  document.getElementById("editEventDate").value = toDatetimeLocalValue(
+    ev.datetime
+  );
+  document.getElementById("editEventDesc").value = ev.description || "";
+  document.getElementById("editEventImage").value = ev.image_url || "";
+
+  const msg = document.getElementById("editEventMsg");
+  if (msg) msg.textContent = "";
+
+  modal.style.display = "flex";
+};
+
+const createForm = document.getElementById("createEventForm");
+if (createForm) {
+  createForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("createEventName").value.trim();
+    const datetime = document.getElementById("createEventDate").value;
+    const description = document.getElementById("createEventDesc").value.trim();
+    const image_url = document.getElementById("createEventImage").value.trim();
+    const msg = document.getElementById("createEventMsg");
+
+    msg.textContent = "";
+
+    if (!name || !datetime) {
+      msg.textContent = "Etkinlik adı ve tarih zorunludur.";
+      msg.className = "status-error";
+      return;
+    }
+
+    const res = await fetch(`${API}/club-admin/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeader(),
+      },
+      body: JSON.stringify({
+        name,
+        datetime,
+        description: description || null,
+        image_url: image_url || null,
+      }),
+    });
+
+    if (res.status === 401) return logout();
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      msg.textContent = d.detail || "Etkinlik oluşturulamadı.";
+      msg.className = "status-error";
+      return;
+    }
+
+    msg.textContent = "Etkinlik başarıyla oluşturuldu ✅";
+    msg.className = "status-success";
+
+    loadEvents();
+    loadStats();
+
+    setTimeout(() => closeCreateEventModal(), 500);
+  });
+}
+
+window.closeEditEventModal = function () {
+  const modal = document.getElementById("editEventModal");
+  if (modal) modal.style.display = "none";
+};
+
+const editForm = document.getElementById("editEventForm");
+if (editForm) {
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const eventId = document.getElementById("editEventId").value;
+    const name = document.getElementById("editEventName").value.trim();
+    const datetime = document.getElementById("editEventDate").value;
+    const description = document.getElementById("editEventDesc").value.trim();
+    const image_url = document.getElementById("editEventImage").value.trim();
+    const msg = document.getElementById("editEventMsg");
+
+    const res = await fetch(`${API}/club-admin/events/${eventId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...authHeader() },
+      body: JSON.stringify({
+        name,
+        datetime,
+        description: description || null,
+        image_url: image_url || null,
+      }),
+    });
+
+    if (res.status === 401) return logout();
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      if (msg) {
+        msg.textContent = d.detail || "Güncelleme başarısız.";
+        msg.className = "status-error";
+      }
+      return;
+    }
+
+    if (msg) {
+      msg.textContent = "Etkinlik güncellendi ✅";
+      msg.className = "status-success";
+    }
+
+    loadEvents();
+    loadStats();
+    setTimeout(() => closeEditEventModal(), 400);
+  });
+}
+
+let regsCache = [];
+let activeRegsEventId = null;
+
+window.openRegsModal = async function (eventId) {
+  activeRegsEventId = eventId;
+  const modal = document.getElementById("regsModal");
+  if (!modal) return;
+
+  const ev = eventsCache.find((x) => x.etkinlik_id === eventId);
+  const subtitle = document.getElementById("regsSubtitle");
+  if (subtitle && ev) subtitle.textContent = `${ev.name} • Katılım kayıtları`;
+
+  modal.style.display = "flex";
+  await loadRegs(eventId);
+};
+
+window.closeRegsModal = function () {
+  const modal = document.getElementById("regsModal");
+  if (modal) modal.style.display = "none";
+};
+
+async function loadRegs(eventId) {
+  const box = document.getElementById("regsList");
+  if (!box) return;
+
+  box.textContent = "Yükleniyor...";
+
+  const res = await fetch(`${API}/club-admin/events/${eventId}/registrations`, {
+    headers: { ...authHeader() },
+  });
+
+  if (res.status === 401) return logout();
+  if (!res.ok) {
+    box.innerHTML = "<p style='color:red;'>Kayıtlar alınamadı.</p>";
+    return;
+  }
+
+  regsCache = await res.json();
+  const filter = document.getElementById("regsFilter")?.value || "all";
+  renderRegs(filter);
+}
+
+function renderRegs(filterValue) {
+  const box = document.getElementById("regsList");
+  if (!box) return;
+
+  let list = regsCache;
+  if (filterValue !== "all")
+    list = regsCache.filter((r) => r.status === filterValue);
+
+  if (list.length === 0) {
+    box.innerHTML =
+      "<p style='color:var(--text-muted); font-size:13px;'>Kayıt yok.</p>";
+    return;
+  }
+
+  box.innerHTML = list
+    .map((r) => {
+      let cls = "pending";
+      if (r.status === "onaylandı") cls = "approved";
+      else if (r.status === "reddedildi") cls = "rejected";
+
+      const fullName =
+        `${r.first_name || ""} ${r.last_name || ""}`.trim() || r.ogrenci_id;
+
+      return `
+  <div class="reg-row">
+    <div class="reg-info">
+      <div class="reg-name-line">
+        <span class="reg-name">${fullName}</span>
+        <span class="reg-id">(${r.ogrenci_id})</span>
+        <span class="status-badge ${cls}">${r.status}</span>
+      </div>
+      <div class="reg-email">${r.email || ""}</div>
+    </div>
+
+    <div class="reg-actions">
+      ${
+        r.status === "beklemede"
+          ? `
+            <button class="button-primary" onclick="approveReg(${r.kayit_id})">Onayla</button>
+            <button class="button-ghost" onclick="rejectReg(${r.kayit_id})">Reddet</button>
+          `
+          : `
+            <button class="button-ghost btn-danger" onclick="deleteReg(${r.kayit_id})">Kaydı Sil</button>
+          `
+      }
+    </div>
+  </div>
+`;
+    })
+    .join("");
+}
+
+// filtre değişince
+const regsFilter = document.getElementById("regsFilter");
+if (regsFilter) {
+  regsFilter.addEventListener("change", () => {
+    renderRegs(regsFilter.value || "all");
+  });
+}
+
+window.approveReg = async function (kayitId) {
+  const res = await fetch(
+    `${API}/club-admin/events/${activeRegsEventId}/registrations/${kayitId}/approve`,
+    { method: "PUT", headers: { ...authHeader() } }
+  );
+  if (res.status === 401) return logout();
+  await loadRegs(activeRegsEventId);
+};
+
+window.rejectReg = async function (kayitId) {
+  const res = await fetch(
+    `${API}/club-admin/events/${activeRegsEventId}/registrations/${kayitId}/reject`,
+    { method: "PUT", headers: { ...authHeader() } }
+  );
+  if (res.status === 401) return logout();
+  await loadRegs(activeRegsEventId);
+};
+
+window.deleteReg = async function (kayitId) {
+  const ok = confirm("Bu kişinin etkinlik kaydı silinsin mi?");
+  if (!ok) return;
+
+  const res = await fetch(
+    `${API}/club-admin/events/${activeRegsEventId}/registrations/${kayitId}`,
+    {
+      method: "DELETE",
+      headers: { ...authHeader() },
+    }
+  );
+
+  if (res.status === 401) return logout();
+
+  if (!res.ok) {
+    alert("Kayıt silinemedi.");
+    return;
+  }
+
+  // listeyi yenile
+  await loadRegs(activeRegsEventId);
+  loadStats();
+};
+
+// İstersen bu endpoint'i backend’e ekleyebilirsin (opsiyonel).
+window.setRegPending = async function (kayitId) {
+  alert("Beklemeye alma endpoint'i eklenmedi. İstersen ekleriz.");
+};
 
 // Etkinlikler sekmesine tıklanınca listeyi yükle
 const eventsTab = document.querySelector("[data-page='events']");

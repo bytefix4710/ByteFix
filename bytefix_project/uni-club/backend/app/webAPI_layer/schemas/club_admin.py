@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from datetime import datetime as dt
 from typing import Optional
-from datetime import datetime
+from pydantic import BaseModel
+
 
 class ClubAdminRegister(BaseModel):
     email: str
@@ -35,7 +36,14 @@ class ClubPublic(BaseModel):
 
 class EventCreate(BaseModel):
     name: str
-    datetime: datetime
+    datetime: dt
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class EventUpdate(BaseModel):
+    name: Optional[str] = None
+    datetime: Optional[dt] = None
     description: Optional[str] = None
     image_url: Optional[str] = None
 
@@ -43,9 +51,22 @@ class EventCreate(BaseModel):
 class EventPublic(BaseModel):
     etkinlik_id: int
     name: str
-    datetime: datetime
+    datetime: dt
     description: Optional[str] = None
     image_url: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+class EventRegPublic(BaseModel):
+    kayit_id: int
+    etkinlik_id: int
+    ogrenci_id: str
+    status: str
+
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
 
     class Config:
         orm_mode = True
