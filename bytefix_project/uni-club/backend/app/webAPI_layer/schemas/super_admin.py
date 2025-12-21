@@ -54,3 +54,15 @@ class StatsResponse(BaseModel):
     total_announcements: int = 0
     total_events: int = 0
 
+class UserPublic(BaseModel):
+    user_type: str  # "member" veya "admin"
+    id: str  # ogrenci_no veya hesap_id
+    email: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    club_id: Optional[int] = None
+    club_name: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
+

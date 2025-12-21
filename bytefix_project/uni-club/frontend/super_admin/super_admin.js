@@ -86,6 +86,8 @@ function showPage(pageName) {
     loadDashboardStats();
   } else if (pageName === "clubs") {
     loadClubs();
+  } else if (pageName === "users") {
+    loadUsers();
   }
 }
 
@@ -460,4 +462,164 @@ if (clubModal) {
       closeModal();
     }
   });
+}
+
+// ------- KULLANICILAR SAYFASI -------
+
+let usersCache = [];
+
+async function loadUsers() {
+  const token = getToken();
+  if (!token) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const usersListDiv = document.getElementById("usersList");
+  if (!usersListDiv) return;
+
+  try {
+    usersListDiv.innerHTML = "<p style='color: var(--text-muted)'>Yükleniyor...</p>";
+
+    const res = await fetch(`${API}/super-admin/users`, {
+      headers: { ...authHeader() },
+    });
+
+    if (res.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error("Kullanıcılar yüklenemedi.");
+    }
+
+    usersCache = await res.json();
+    renderUsersTable();
+  } catch (err) {
+    console.error(err);
+    if (usersListDiv) {
+      usersListDiv.innerHTML = "<p style='color: red; font-size: 13px;'>Kullanıcılar yüklenirken hata oluştu.</p>";
+    }
+  }
+}
+
+function renderUsersTable() {
+  const usersListDiv = document.getElementById("usersList");
+  if (!usersListDiv) return;
+
+  const userTypeFilter = document.getElementById("userTypeFilter");
+  const searchInput = document.getElementById("userSearchInput");
+  
+  const filterValue = userTypeFilter ? userTypeFilter.value : "all";
+  const searchValue = searchInput ? searchInput.value.toLowerCase().trim() : "";
+
+  let filtered = usersCache;
+
+  // Kullanıcı tipine göre filtrele
+  if (filterValue !== "all") {
+    filtered = filtered.filter((u) => u.user_type === filterValue);
+  }
+
+  // Arama filtresi
+  if (searchValue) {
+    filtered = filtered.filter((u) => {
+      const fullName = `${u.first_name || ""} ${u.last_name || ""}`.toLowerCase();
+      const email = (u.email || "").toLowerCase();
+      const clubName = (u.club_name || "").toLowerCase();
+      return (
+        fullName.includes(searchValue) ||
+        email.includes(searchValue) ||
+        clubName.includes(searchValue)
+      );
+    });
+  }
+
+  if (filtered.length === 0) {
+    usersListDiv.innerHTML = "<p style='color: var(--text-muted); font-size: 13px;'>Bu filtreye uygun kullanıcı bulunamadı.</p>";
+    return;
+  }
+
+  const rows = filtered
+    .map((u) => {
+      const userTypeBadge = u.user_type === "admin" 
+        ? '<span class="status-badge approved" style="background: #6366f1; color: white;">Kulüp Yöneticisi</span>'
+        : '<span class="status-badge pending" style="background: #10b981; color: white;">Üye</span>';
+      
+      const nameDisplay = u.first_name && u.last_name 
+        ? `${u.first_name} ${u.last_name}` 
+        : u.user_type === "admin" 
+          ? "Kulüp Yöneticisi" 
+          : "İsimsiz";
+      
+      const clubDisplay = u.club_name 
+        ? `<span style="color: var(--accent); font-weight: 500;">${u.club_name}</span>` 
+        : '<span style="color: var(--text-muted);">Kulüp yok</span>';
+
+      return `
+        <tr style="cursor: pointer; transition: background-color 0.2s;" 
+            onmouseover="this.style.backgroundColor='rgba(99, 102, 241, 0.1)'" 
+            onmouseout="this.style.backgroundColor='transparent'"
+            onclick="filterByUserType('${u.user_type}')">
+          <td>${userTypeBadge}</td>
+          <td><strong>${escapeHtml(nameDisplay)}</strong></td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>${clubDisplay}</td>
+          <td style="color: var(--text-muted); font-family: monospace;">${escapeHtml(u.id)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  usersListDiv.innerHTML = `
+    <table class="member-table" style="width: 100%;">
+      <thead>
+        <tr>
+          <th>Tip</th>
+          <th>Ad Soyad</th>
+          <th>Email</th>
+          <th>Kulüp</th>
+          <th>ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+// Filtreleme ve arama event listener'ları
+const userTypeFilter = document.getElementById("userTypeFilter");
+if (userTypeFilter) {
+  userTypeFilter.addEventListener("change", () => {
+    renderUsersTable();
+  });
+}
+
+const userSearchInput = document.getElementById("userSearchInput");
+if (userSearchInput) {
+  userSearchInput.addEventListener("input", () => {
+    renderUsersTable();
+  });
+}
+
+// Kullanıcı tipine göre filtreleme fonksiyonu (tablodan tıklanınca)
+window.filterByUserType = function(userType) {
+  const filterSelect = document.getElementById("userTypeFilter");
+  if (filterSelect) {
+    filterSelect.value = userType;
+    renderUsersTable();
+  }
+};
+
+// HTML escape fonksiyonu (XSS önleme)
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }

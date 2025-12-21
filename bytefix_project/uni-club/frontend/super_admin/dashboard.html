@@ -143,15 +143,34 @@
                   <div>
                     <div class="card-title">Kullanıcılar</div>
                     <div class="card-subtitle">
-                      Sistem kullanıcılarını görüntüle ve yönet.
+                      Tüm kulüplerin üyelerini ve yöneticilerini görüntüle ve yönet.
                     </div>
                   </div>
-                  <button class="button-primary" onclick="alert('Kullanıcı ekleme özelliği yakında eklenecek.')">
-                    + Yeni Kullanıcı
-                  </button>
                 </div>
+                
+                <!-- Filtreleme ve Arama -->
+                <div style="display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; align-items: center;">
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <span style="font-size: 14px; color: var(--text-muted);">Filtre:</span>
+                    <select id="userTypeFilter" style="padding: 6px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+                      <option value="all">Tümü</option>
+                      <option value="member">Üyeler</option>
+                      <option value="admin">Kulüp Yöneticileri</option>
+                    </select>
+                  </div>
+                  
+                  <div style="flex: 1; min-width: 200px;">
+                    <input 
+                      type="text" 
+                      id="userSearchInput" 
+                      placeholder="İsim, email veya kulüp adı ile ara..." 
+                      style="width: 100%; padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg); color: var(--text);"
+                    />
+                  </div>
+                </div>
+                
                 <div id="usersList" style="margin-top: 16px">
-                  <p style="color: var(--text-muted)">Kullanıcı yönetimi özelliği geliştirme aşamasında.</p>
+                  <p style="color: var(--text-muted)">Yükleniyor...</p>
                 </div>
               </div>
             </div>
