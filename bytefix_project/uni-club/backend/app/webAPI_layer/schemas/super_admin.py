@@ -54,6 +54,18 @@ class StatsResponse(BaseModel):
     total_announcements: int = 0
     total_events: int = 0
 
+class EventPublic(BaseModel):
+    etkinlik_id: int
+    kulup_id: int
+    kulup_name: str
+    name: str
+    datetime: str
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    
+    class Config:
+        orm_mode = True
+
 class UserPublic(BaseModel):
     user_type: str  # "member" veya "admin"
     id: str  # ogrenci_no veya hesap_id
