@@ -31,6 +31,7 @@ def list_announcements(
 
 
 @router.post("", response_model=AnnouncementPublic)
+@router.post("", response_model=AnnouncementPublic)
 def create_announcement(
     payload: AnnouncementCreate,
     admin=Depends(get_current_admin),
@@ -38,18 +39,25 @@ def create_announcement(
 ):
     club = _get_admin_club(admin, db)
 
+    title = (payload.title or "").strip()
     desc = (payload.description or "").strip()
-    if len(desc) < 3:
-        raise HTTPException(status_code=400, detail="Duyuru açıklaması çok kısa.")
+
+    if len(title) < 3:
+        raise HTTPException(status_code=400, detail="Başlık en az 3 karakter olmalı.")
+    if len(desc) < 5:
+        raise HTTPException(status_code=400, detail="Açıklama en az 5 karakter olmalı.")
 
     ann = models.Announcement(
         kulup_id=club.kulup_id,
+        title=title,
         description=desc,
+        # created_at otomatik
     )
     db.add(ann)
     db.commit()
     db.refresh(ann)
     return ann
+
 
 
 @router.delete("/{duyuru_id}")

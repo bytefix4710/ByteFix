@@ -998,27 +998,42 @@ async function loadAnnouncements() {
   }
 
   box.innerHTML = anns
-    .map(
-      (a) => `
-      <div class="reg-row" style="grid-template-columns:minmax(0,1fr) 160px;">
-        <div class="reg-info">
-          <div class="reg-name-line">
-            <span class="reg-name">Duyuru #${a.duyuru_id}</span>
+    .map((a) => {
+      const dateText = new Date(a.created_at).toLocaleString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return `
+      <div class="event-card" style="padding:14px;">
+        <div class="event-card-inner" style="grid-template-columns:minmax(0,1fr) 140px;">
+          <div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <div class="event-title" style="margin:0;">${escapeHtml(
+                a.title
+              )}</div>
+              <span class="event-date">${dateText}</span>
+            </div>
+
+            <p class="event-desc" style="margin-top:8px;">
+              ${escapeHtml(a.description)}
+            </p>
           </div>
-          <div class="reg-sub" style="margin-top:6px; color:var(--text-main); font-size:13px; line-height:1.45;">
-            ${escapeHtml(a.description)}
+
+          <div class="event-actions">
+            <button class="button-ghost btn-danger" onclick="deleteAnnouncement(${
+              a.duyuru_id
+            })">
+              Sil
+            </button>
           </div>
-        </div>
-        <div class="reg-actions">
-          <button class="button-ghost btn-danger" onclick="deleteAnnouncement(${
-            a.duyuru_id
-          })">
-            Sil
-          </button>
         </div>
       </div>
-    `
-    )
+    `;
+    })
     .join("");
 }
 
@@ -1042,13 +1057,15 @@ const annForm = document.getElementById("createAnnouncementForm");
 if (annForm) {
   annForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const title = document.getElementById("announcementTitle").value.trim();
     const desc = document.getElementById("announcementDesc").value.trim();
+
     const msg = document.getElementById("announcementMsg");
 
     const res = await fetch(`${API}/club-admin/announcements`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeader() },
-      body: JSON.stringify({ description: desc }),
+      body: JSON.stringify({ title, description: desc }),
     });
 
     if (res.status === 401) return logout();

@@ -130,39 +130,45 @@ def reset_and_seed():
         # DUYURULAR (ANNOUNCEMENT)
         # =========================
         announcements = [
-            # Bilgisayar Mühendisliği Kulübü
-            models.Announcement(
-                kulup_id=club1.kulup_id,
-                description="Yeni dönem için Python ve Yapay Zeka atölyeleri planlanmaktadır. "
-                    "Takvim yakında paylaşılacaktır.",
-            ),
-            models.Announcement(
-                kulup_id=club1.kulup_id,
-                description="Kulüp toplantımız 18 Aralık Salı günü saat 17:30'da yapılacaktır.",
-            ),
+    models.Announcement(
+        kulup_id=club1.kulup_id,
+        title="Yeni Dönem Atölye Takvimi",
+        description="Yeni dönem için Python, Yapay Zeka ve Backend atölyeleri planlanıyor. Takvim bu hafta paylaşılacak.",
+        created_at=datetime.now() - timedelta(days=2),
+    ),
+    models.Announcement(
+        kulup_id=club1.kulup_id,
+        title="Kulüp Toplantısı",
+        description="18 Aralık Salı 17:30'da B-201'de dönem planlama toplantısı yapılacaktır.",
+        created_at=datetime.now() - timedelta(days=1),
+    ),
 
-            # Fotoğrafçılık Kulübü
-            models.Announcement(
-                kulup_id=club2.kulup_id,
-                description="Hafta sonu şehir içi fotoğraf gezisi düzenlenecektir. "
-                            "Katılmak isteyenler etkinlik sayfasından başvurabilir.",
-            ),
-            models.Announcement(
-                kulup_id=club2.kulup_id,
-                description="Portre fotoğrafçılığı üzerine workshop için kayıtlar açılmıştır.",
-            ),
+    models.Announcement(
+        kulup_id=club2.kulup_id,
+        title="Fotoğraf Gezisi Başvuruları",
+        description="Hafta sonu şehir içi fotoğraf gezisi düzenlenecek. Katılım için duyuru altındaki formu doldurun.",
+        created_at=datetime.now() - timedelta(days=3),
+    ),
+    models.Announcement(
+        kulup_id=club2.kulup_id,
+        title="Portre Workshop Kayıtları Açıldı",
+        description="Portre fotoğrafçılığı workshop'u için kayıtlar açıldı. Kontenjan 20 kişi ile sınırlıdır.",
+        created_at=datetime.now() - timedelta(days=1, hours=4),
+    ),
 
-            # Müzik Kulübü
-            models.Announcement(
-                kulup_id=club3.kulup_id,
-                description="Bahar konseri için sahne alacak gruplar belirleniyor. "
-                            "Başvurular kulüp odasında alınacaktır.",
-            ),
-            models.Announcement(
-                kulup_id=club3.kulup_id,
-                description="Gitar ve bateri dersleri için yeni kontenjan açılmıştır.",
-            ),
-        ]
+    models.Announcement(
+        kulup_id=club3.kulup_id,
+        title="Bahar Konseri Seçmeleri",
+        description="Bahar konserinde sahne alacak öğrenci grupları için seçmeler başlıyor. Başvuru için kulüp odasına bekleniyorsunuz.",
+        created_at=datetime.now() - timedelta(days=4),
+    ),
+    models.Announcement(
+        kulup_id=club3.kulup_id,
+        title="Yeni Enstrüman Dersleri",
+        description="Gitar ve bateri dersleri için yeni kontenjan açılmıştır. Ders saatleri haftalık olarak paylaşılacaktır.",
+        created_at=datetime.now() - timedelta(days=2, hours=6),
+    ),
+]
 
         db.add_all(announcements)
         db.commit()

@@ -72,12 +72,15 @@ class EventRegPublic(BaseModel):
         orm_mode = True
 
 class AnnouncementCreate(BaseModel):
+    title: str
     description: str
 
 class AnnouncementPublic(BaseModel):
     duyuru_id: int
     kulup_id: int
+    title: str
     description: str
+    created_at: dt
 
     class Config:
-        orm_mode = True  # v2 uyarısı sorun değil, istersen from_attributes'a geçeriz
+        orm_mode = True

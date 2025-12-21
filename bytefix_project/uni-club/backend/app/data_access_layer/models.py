@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, func
 from sqlalchemy.orm import relationship
 from .db import Base
 
@@ -174,29 +174,18 @@ class EventReg(Base):
 
 # =============== ANNOUNCEMENT (DUYURU) TABLOSU ===============
 # announcement:
-#   duyuruId (PK), kulupId (FK -> club.kulupId), aciklama
+#   duyuruId (PK), kulupId (FK -> club.kulupId), aciklama, tarih
 class Announcement(Base):
     __tablename__ = "announcement"
 
-    duyuru_id = Column(
-        "duyuruId",
-        Integer,
-        primary_key=True,
-        index=True,
-        autoincrement=True,
-    )
+    duyuru_id = Column("duyuruId", Integer, primary_key=True, index=True, autoincrement=True)
 
-    kulup_id = Column(
-        "kulupId",
-        Integer,
-        ForeignKey("club.kulupId"),
-        nullable=False,
-    )
+    kulup_id = Column("kulupId", Integer, ForeignKey("club.kulupId"), nullable=False)
 
-    description = Column(
-        "aciklama",
-        Text,
-        nullable=False,
-    )
+    title = Column("baslik", String(200), nullable=False)
+    description = Column("aciklama", Text, nullable=False)
+
+    created_at = Column("tarih", DateTime, nullable=False, server_default=func.now())
 
     club = relationship("Club", back_populates="announcements")
+
