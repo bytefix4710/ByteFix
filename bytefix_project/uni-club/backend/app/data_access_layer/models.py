@@ -88,6 +88,13 @@ class Club(Base):
         cascade="all, delete-orphan",
     )
 
+    announcements = relationship(
+    "Announcement",
+    back_populates="club",
+    cascade="all, delete-orphan",
+    )
+
+
 
 # =============== MEMBERSHIP TABLOSU ===============
 # membership:
@@ -164,3 +171,32 @@ class EventReg(Base):
 
     event = relationship("Event", back_populates="registrations")
     member = relationship("Member", back_populates="event_regs")
+
+# =============== ANNOUNCEMENT (DUYURU) TABLOSU ===============
+# announcement:
+#   duyuruId (PK), kulupId (FK -> club.kulupId), aciklama
+class Announcement(Base):
+    __tablename__ = "announcement"
+
+    duyuru_id = Column(
+        "duyuruId",
+        Integer,
+        primary_key=True,
+        index=True,
+        autoincrement=True,
+    )
+
+    kulup_id = Column(
+        "kulupId",
+        Integer,
+        ForeignKey("club.kulupId"),
+        nullable=False,
+    )
+
+    description = Column(
+        "aciklama",
+        Text,
+        nullable=False,
+    )
+
+    club = relationship("Club", back_populates="announcements")

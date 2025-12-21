@@ -39,6 +39,13 @@
             <div class="sidebar-item" data-page="club">🏛 Kulüp Bilgileri</div>
             <div class="sidebar-item" data-page="events">📅 Etkinlikler</div>
             <div class="sidebar-item" data-page="members">👥 Üyeler</div>
+            <div
+              class="sidebar-item"
+              data-page="announcements"
+              onclick="showPage('announcements')"
+            >
+              📣 Duyurular
+            </div>
           </aside>
 
           <!-- İçerik -->
@@ -398,6 +405,84 @@
                 </div>
 
                 <div id="allMembers">Yükleniyor…</div>
+              </div>
+            </section>
+
+            <!-- DUYURULAR -->
+            <section id="page-announcements" class="page-view">
+              <div class="card">
+                <div
+                  class="card-header"
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <div>
+                    <div class="card-title">Duyurular</div>
+                    <div class="card-subtitle">
+                      Kulübüne ait duyuruları yönet.
+                    </div>
+                  </div>
+
+                  <button
+                    class="button-primary btn-xs"
+                    onclick="openCreateAnnouncementModal()"
+                  >
+                    + Duyuru Oluştur
+                  </button>
+                </div>
+
+                <div id="announcementsList" style="margin-top: 12px">
+                  Yükleniyor...
+                </div>
+              </div>
+              <div
+                id="createAnnouncementModal"
+                class="modal"
+                style="display: none"
+              >
+                <div class="modal-content">
+                  <div class="card-header" style="margin-bottom: 10px">
+                    <div>
+                      <div class="card-title">Yeni Duyuru</div>
+                      <div class="card-subtitle">
+                        Kısa ve net bir bilgilendirme yaz.
+                      </div>
+                    </div>
+                    <button
+                      class="button-ghost btn-xs"
+                      onclick="closeCreateAnnouncementModal()"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+
+                  <form id="createAnnouncementForm">
+                    <label>
+                      <span class="label">Duyuru Açıklaması</span>
+                      <textarea
+                        id="announcementDesc"
+                        rows="5"
+                        required
+                      ></textarea>
+                    </label>
+
+                    <button
+                      type="submit"
+                      class="button-primary"
+                      style="justify-content: center"
+                    >
+                      Oluştur
+                    </button>
+
+                    <div
+                      id="announcementMsg"
+                      style="margin-top: 6px; font-size: 12px"
+                    ></div>
+                  </form>
+                </div>
               </div>
             </section>
           </main>

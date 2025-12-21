@@ -15,6 +15,7 @@ def reset_and_seed():
         # ============================
         db.query(models.EventReg).delete()
         db.query(models.Event).delete()
+        db.query(models.Announcement).delete() 
         db.query(models.Membership).delete()
         db.query(models.Club).delete()
         db.query(models.ClubAdmin).delete()
@@ -124,6 +125,48 @@ def reset_and_seed():
         db.commit()
 
         clubs = [club1, club2, club3]
+        
+        # =========================
+        # DUYURULAR (ANNOUNCEMENT)
+        # =========================
+        announcements = [
+            # Bilgisayar Mühendisliği Kulübü
+            models.Announcement(
+                kulup_id=club1.kulup_id,
+                description="Yeni dönem için Python ve Yapay Zeka atölyeleri planlanmaktadır. "
+                    "Takvim yakında paylaşılacaktır.",
+            ),
+            models.Announcement(
+                kulup_id=club1.kulup_id,
+                description="Kulüp toplantımız 18 Aralık Salı günü saat 17:30'da yapılacaktır.",
+            ),
+
+            # Fotoğrafçılık Kulübü
+            models.Announcement(
+                kulup_id=club2.kulup_id,
+                description="Hafta sonu şehir içi fotoğraf gezisi düzenlenecektir. "
+                            "Katılmak isteyenler etkinlik sayfasından başvurabilir.",
+            ),
+            models.Announcement(
+                kulup_id=club2.kulup_id,
+                description="Portre fotoğrafçılığı üzerine workshop için kayıtlar açılmıştır.",
+            ),
+
+            # Müzik Kulübü
+            models.Announcement(
+                kulup_id=club3.kulup_id,
+                description="Bahar konseri için sahne alacak gruplar belirleniyor. "
+                            "Başvurular kulüp odasında alınacaktır.",
+            ),
+            models.Announcement(
+                kulup_id=club3.kulup_id,
+                description="Gitar ve bateri dersleri için yeni kontenjan açılmıştır.",
+            ),
+        ]
+
+        db.add_all(announcements)
+        db.commit()
+
 
         # ============================
         # 5) 20 ÜYELİK
@@ -201,6 +244,8 @@ def reset_and_seed():
         print(f" - Üyelikler: {len(memberships)}")
         print(f" - Etkinlikler: {len(events)}")
         print(f" - Etkinlik kayıtları: {len(event_regs)}")
+        print(f" - Duyurular: {len(announcements)}")
+
 
     finally:
         db.close()

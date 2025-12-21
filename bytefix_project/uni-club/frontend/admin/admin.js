@@ -225,6 +225,7 @@ function showPage(pageName) {
   if (pageName === "overview") {
     loadStats();
   }
+  if (pageName === "announcements") loadAnnouncements();
 }
 
 window.showPage = showPage;
@@ -954,4 +955,129 @@ if (eventForm) {
       }
     }
   });
+}
+
+// ===== Announcements =====
+window.openCreateAnnouncementModal = function () {
+  const m = document.getElementById("createAnnouncementModal");
+  if (!m) return;
+  document.getElementById("createAnnouncementForm").reset();
+  const msg = document.getElementById("announcementMsg");
+  if (msg) msg.textContent = "";
+  m.style.display = "flex";
+};
+
+window.closeCreateAnnouncementModal = function () {
+  const m = document.getElementById("createAnnouncementModal");
+  if (m) m.style.display = "none";
+};
+
+async function loadAnnouncements() {
+  const box = document.getElementById("announcementsList");
+  if (!box) return;
+
+  box.textContent = "Yükleniyor...";
+
+  const res = await fetch(`${API}/club-admin/announcements`, {
+    headers: { ...authHeader() },
+  });
+
+  if (res.status === 401) return logout();
+  if (!res.ok) {
+    box.innerHTML =
+      "<p style='color:red; font-size:13px;'>Duyurular alınamadı.</p>";
+    return;
+  }
+
+  const anns = await res.json();
+
+  if (anns.length === 0) {
+    box.innerHTML =
+      "<p style='color:var(--text-muted); font-size:13px;'>Henüz duyuru yok.</p>";
+    return;
+  }
+
+  box.innerHTML = anns
+    .map(
+      (a) => `
+      <div class="reg-row" style="grid-template-columns:minmax(0,1fr) 160px;">
+        <div class="reg-info">
+          <div class="reg-name-line">
+            <span class="reg-name">Duyuru #${a.duyuru_id}</span>
+          </div>
+          <div class="reg-sub" style="margin-top:6px; color:var(--text-main); font-size:13px; line-height:1.45;">
+            ${escapeHtml(a.description)}
+          </div>
+        </div>
+        <div class="reg-actions">
+          <button class="button-ghost btn-danger" onclick="deleteAnnouncement(${
+            a.duyuru_id
+          })">
+            Sil
+          </button>
+        </div>
+      </div>
+    `
+    )
+    .join("");
+}
+
+window.deleteAnnouncement = async function (duyuruId) {
+  const ok = confirm("Bu duyuruyu silmek istiyor musun?");
+  if (!ok) return;
+
+  const res = await fetch(`${API}/club-admin/announcements/${duyuruId}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+
+  if (res.status === 401) return logout();
+  if (!res.ok) return alert("Duyuru silinemedi.");
+
+  loadAnnouncements();
+};
+
+// Form submit
+const annForm = document.getElementById("createAnnouncementForm");
+if (annForm) {
+  annForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const desc = document.getElementById("announcementDesc").value.trim();
+    const msg = document.getElementById("announcementMsg");
+
+    const res = await fetch(`${API}/club-admin/announcements`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeader() },
+      body: JSON.stringify({ description: desc }),
+    });
+
+    if (res.status === 401) return logout();
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      if (msg) {
+        msg.textContent = d.detail || "Duyuru oluşturulamadı.";
+        msg.className = "status-error";
+      }
+      return;
+    }
+
+    if (msg) {
+      msg.textContent = "Duyuru oluşturuldu ✅";
+      msg.className = "status-success";
+    }
+
+    loadAnnouncements();
+    setTimeout(() => closeCreateAnnouncementModal(), 400);
+  });
+}
+
+// Basit HTML escape (XSS önleme)
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
