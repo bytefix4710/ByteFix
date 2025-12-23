@@ -14,6 +14,9 @@ from app.webAPI_layer.routers.super_admin import events as super_admin_events
 from app.webAPI_layer.routers.member import auth as user_auth
 from app.webAPI_layer.routers.member import club as user_club
 from app.webAPI_layer.routers.club_admin import announcement as club_admin_announcement
+from app.webAPI_layer.routers.member import event as user_event
+from app.webAPI_layer.routers.member import announcement as user_announcement
+
 
 
 app = FastAPI(title="UniClub API")
@@ -50,3 +53,5 @@ app.include_router(super_admin_events.router)
 # Üye (Member) Routerları
 app.include_router(user_auth.router)
 app.include_router(user_club.router)
+app.include_router(user_event.router)
+app.include_router(user_announcement.router)

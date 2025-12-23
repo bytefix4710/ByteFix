@@ -6,6 +6,7 @@ from app.data_access_layer import models
 from app.data_access_layer.db import SessionLocal
 from app.webAPI_layer.schemas.member import ClubPublic
 from app.webAPI_layer.routers.member.auth import get_current_member
+from datetime import datetime
 
 router = APIRouter(prefix="/members", tags=["Members Club Operations"])
 
@@ -170,4 +171,40 @@ def get_my_clubs(
     return {
         "approved": approved,
         "pending": pending,
+    }
+
+@router.get("/clubs/{club_id}/events")
+def get_club_events(club_id: int, db: Session = Depends(get_db)):
+    club = db.query(models.Club).filter(models.Club.kulup_id == club_id).first()
+    if not club:
+        raise HTTPException(404, "Kulüp bulunamadı.")
+
+    now = datetime.now()
+
+    upcoming = (
+        db.query(models.Event)
+        .filter(models.Event.kulup_id == club_id, models.Event.datetime > now)
+        .order_by(models.Event.datetime.asc())
+        .all()
+    )
+
+    past = (
+        db.query(models.Event)
+        .filter(models.Event.kulup_id == club_id, models.Event.datetime <= now)
+        .order_by(models.Event.datetime.desc())
+        .all()
+    )
+
+    def to_dict(ev: models.Event):
+        return {
+            "etkinlik_id": ev.etkinlik_id,
+            "name": ev.name,
+            "datetime": ev.datetime.isoformat(),
+            "description": ev.description,
+            "image_url": ev.image_url,
+        }
+
+    return {
+        "upcoming": [to_dict(e) for e in upcoming],
+        "past": [to_dict(e) for e in past],
     }

@@ -137,12 +137,15 @@ class Event(Base):
     description = Column("aciklama", Text, nullable=True)
     image_url = Column("foto", String(500), nullable=True)
 
+    kontenjan = Column("kontenjan", Integer, nullable=True)
+
     club = relationship("Club", back_populates="events")
     registrations = relationship(
         "EventReg",
         back_populates="event",
         cascade="all, delete-orphan",
     )
+
 
 
 

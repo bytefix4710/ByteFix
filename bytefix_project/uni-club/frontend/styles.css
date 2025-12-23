@@ -726,6 +726,14 @@ textarea {
     0 0 0 1px rgba(148, 163, 184, 0.4);
   border: 1px solid rgba(148, 163, 184, 0.35);
 }
+body.modal-open .dashboard-layout{
+  pointer-events: none;   /* arka tarafa tıklama tamamen kapanır */
+}
+
+body.modal-open #clubDetailModal{
+  pointer-events: auto;   /* modal yine tıklanabilir */
+}
+
 
 /* X kapatma butonu */
 .modal-close {
@@ -1092,4 +1100,19 @@ textarea {
     flex: 1;
     min-width: 120px;
   }
+}
+
+.announcements-list {
+  max-height: 320px;      /* burayı arttır/azalt */
+  overflow-y: auto;
+  padding-right: 6px;     /* scroll bar içeride kalsın */
+}
+
+/* scroll bar biraz daha estetik olsun (opsiyonel) */
+.announcements-list::-webkit-scrollbar {
+  width: 6px;
+}
+.announcements-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 8px;
 }

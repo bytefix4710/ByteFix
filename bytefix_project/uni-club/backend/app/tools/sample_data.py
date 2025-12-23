@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
-
 from app.data_access_layer.db import SessionLocal, engine
 from app.data_access_layer import models
 from app.business_logic_layer.services.club_admin.auth_service import hash_password
-
+import random
 
 def reset_and_seed():
     models.Base.metadata.create_all(bind=engine)
@@ -216,6 +215,7 @@ def reset_and_seed():
                 datetime=now + timedelta(days=i + 1),
                 description=desc,
                 image_url=img,
+                kontenjan=random.choice([10, 15, 20, 25, 30]),
             )
             events.append(ev)
 
