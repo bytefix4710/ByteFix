@@ -13,12 +13,13 @@
           <div class="app-title-block">
             <div class="app-title">
               UniClub
-              <span class="app-title-badge">Kulüp Admin Paneli</span>
+              <span class="app-title-badge">Kulüp Admin Panel</span>
             </div>
             <div class="app-subtitle">
               Kulübünün bilgilerini ve işlemlerini buradan yönetebilirsin.
             </div>
           </div>
+
           <nav class="app-nav">
             <button class="button-ghost" onclick="showPage('overview')">
               Ana Sayfa
@@ -29,22 +30,52 @@
           </nav>
         </header>
 
-        <!-- Sol Menü + İçerik -->
         <div class="dashboard-layout">
-          <!-- Sidebar -->
+          <!-- Sidebar Menü (Süper Admin tarzı) -->
           <aside class="sidebar">
-            <div class="sidebar-item active" data-page="overview">
-              🏠 Ana Sayfa
+            <div
+              class="sidebar-item active"
+              data-page="overview"
+              onclick="showPage('overview')"
+            >
+              <span>🏠</span>
+              <span>Ana Sayfa</span>
             </div>
-            <div class="sidebar-item" data-page="club">🏛 Kulüp Bilgileri</div>
-            <div class="sidebar-item" data-page="events">📅 Etkinlikler</div>
-            <div class="sidebar-item" data-page="members">👥 Üyeler</div>
+
+            <div
+              class="sidebar-item"
+              data-page="club"
+              onclick="showPage('club')"
+            >
+              <span>🏛️</span>
+              <span>Kulüp Bilgileri</span>
+            </div>
+
+            <div
+              class="sidebar-item"
+              data-page="events"
+              onclick="showPage('events')"
+            >
+              <span>📅</span>
+              <span>Etkinlikler</span>
+            </div>
+
+            <div
+              class="sidebar-item"
+              data-page="members"
+              onclick="showPage('members')"
+            >
+              <span>👥</span>
+              <span>Üyeler</span>
+            </div>
+
             <div
               class="sidebar-item"
               data-page="announcements"
               onclick="showPage('announcements')"
             >
-              📣 Duyurular
+              <span>📣</span>
+              <span>Duyurular</span>
             </div>
           </aside>
 
@@ -63,14 +94,7 @@
                   <span id="adminEmail" class="chip">(Giriş yapıldı)</span>
                 </div>
 
-                <div
-                  style="
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-                    gap: 16px;
-                    margin-top: 10px;
-                  "
-                >
+                <div class="stats-grid">
                   <div class="stat-card">
                     <div class="stat-label">Toplam Üye</div>
                     <div id="totalMembersValue" class="stat-value">0</div>
@@ -90,106 +114,10 @@
                   </div>
                 </div>
               </div>
-
-              <div class="card" style="margin-top: 18px">
-                <div class="card-header">
-                  <div>
-                    <div class="card-title">Son Aktiviteler</div>
-                    <div class="card-subtitle">
-                      Kulüpteki son işlemler ve güncellemeler.
-                    </div>
-                  </div>
-                </div>
-                <p
-                  style="
-                    font-size: 13px;
-                    color: var(--text-muted);
-                    margin-top: 8px;
-                  "
-                >
-                  Yakında eklenecek…
-                </p>
-              </div>
             </section>
 
-            <!-- KULÜP BİLGİLERİ SAYFASI -->
+            <!-- KULÜP BİLGİLERİ -->
             <section id="page-club" class="page-view">
-              <div class="card">
-                <div class="card-header">
-                  <div>
-                    <div class="card-title">Kulüp Özeti</div>
-                    <div class="card-subtitle">
-                      Giriş yaptığın admin hesabına bağlı kulübün bilgileri.
-                    </div>
-                  </div>
-                </div>
-
-                <!-- admin.js burayı dolduruyor -->
-                <div id="clubInfo">Kulüp bilgileri yükleniyor...</div>
-              </div>
-
-              <div class="card" style="margin-top: 18px">
-                <div class="card-header">
-                  <div>
-                    <div class="card-title">Kulüp Bilgilerini Güncelle</div>
-                    <div class="card-subtitle">
-                      Ad, açıklama, e-posta ve telefon alanlarını
-                      düzenleyebilirsin.
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Form id ve input id’leri admin.js ile uyumlu -->
-                <form id="clubForm">
-                  <label>
-                    <span class="label">Kulüp Adı</span>
-                    <input
-                      type="text"
-                      id="clubNameInput"
-                      placeholder="Kulüp adı"
-                    />
-                  </label>
-
-                  <label>
-                    <span class="label">Açıklama</span>
-                    <textarea
-                      id="clubDescInput"
-                      placeholder="Kulüp açıklaması"
-                    ></textarea>
-                  </label>
-
-                  <label>
-                    <span class="label">Kulüp E-posta</span>
-                    <input
-                      type="email"
-                      id="clubEmailInput"
-                      placeholder="ornek@kulup.com"
-                    />
-                  </label>
-
-                  <label>
-                    <span class="label">Telefon</span>
-                    <input
-                      type="text"
-                      id="clubPhoneInput"
-                      placeholder="05xx xxx xx xx"
-                    />
-                  </label>
-
-                  <button
-                    type="submit"
-                    class="button-primary"
-                    style="justify-content: center"
-                  >
-                    Kaydet
-                  </button>
-                  <div id="statusMsg" class="status-success"></div>
-                </form>
-              </div>
-            </section>
-
-            <!-- ETKİNLİKLER -->
-            <section id="page-events" class="page-view">
               <div class="card">
                 <div
                   class="card-header"
@@ -200,10 +128,116 @@
                   "
                 >
                   <div>
-                    <div class="card-title">Etkinliklerim</div>
-                    <div class="card-subtitle">
-                      Kulübüne ait etkinlikleri görüntüleyebilirsin.
+                    <div class="card-title">Kulüp Özeti</div>
+                  </div>
+
+                  <button
+                    class="button-primary btn-xs"
+                    onclick="openEditClubModal()"
+                  >
+                    ✏️ Düzenle
+                  </button>
+                </div>
+
+                <!-- admin.js burayı dolduruyor -->
+                <div id="clubInfo">Kulüp bilgileri yükleniyor...</div>
+              </div>
+              <!-- Kulüp Bilgilerini Düzenle Modal -->
+              <div
+                id="editClubModal"
+                class="modal"
+                style="display: none"
+                onclick="if(event.target===this) closeEditClubModal()"
+              >
+                <div class="modal-content" onclick="event.stopPropagation()">
+                  <div class="card-header" style="margin-bottom: 10px">
+                    <div>
+                      <div class="card-title">Kulüp Bilgilerini Düzenle</div>
+                      <div class="card-subtitle">
+                        Ad, açıklama, e-posta ve telefon alanlarını
+                        güncelleyebilirsin.
+                      </div>
                     </div>
+                    <button
+                      class="button-ghost btn-xs"
+                      onclick="closeEditClubModal()"
+                    >
+                      Kapat
+                    </button>
+                  </div>
+
+                  <!-- Form id ve input id’leri ESKİSİYLE AYNI KALDI -->
+                  <form id="clubForm">
+                    <label>
+                      <span class="label">Kulüp Adı</span>
+                      <input
+                        type="text"
+                        id="clubNameInput"
+                        placeholder="Kulüp adı"
+                      />
+                    </label>
+
+                    <label>
+                      <span class="label">Açıklama</span>
+                      <textarea
+                        id="clubDescInput"
+                        placeholder="Kulüp açıklaması"
+                      ></textarea>
+                    </label>
+                    <label>
+                      <span class="label">Misyon</span>
+                      <textarea
+                        id="clubMissionInput"
+                        placeholder="Kulübün misyonu"
+                      ></textarea>
+                    </label>
+
+                    <label>
+                      <span class="label">Vizyon</span>
+                      <textarea
+                        id="clubVisionInput"
+                        placeholder="Kulübün vizyonu"
+                      ></textarea>
+                    </label>
+
+                    <label>
+                      <span class="label">Kulüp E-posta</span>
+                      <input
+                        type="email"
+                        id="clubEmailInput"
+                        placeholder="ornek@kulup.com"
+                      />
+                    </label>
+
+                    <label>
+                      <span class="label">Telefon</span>
+                      <input
+                        type="text"
+                        id="clubPhoneInput"
+                        placeholder="05xx xxx xx xx"
+                      />
+                    </label>
+
+                    <button
+                      type="submit"
+                      class="button-primary"
+                      style="justify-content: center"
+                    >
+                      Kaydet
+                    </button>
+
+                    <div id="statusMsg"></div>
+                  </form>
+                </div>
+              </div>
+            </section>
+
+            <!-- ETKİNLİKLER -->
+            <section id="page-events" class="page-view">
+              <div class="card">
+                <div class="card-header card-header-split">
+                  <div>
+                    <div class="card-title">Etkinliklerim</div>
                   </div>
 
                   <button
@@ -263,18 +297,19 @@
                       <input id="editEventImage" type="text" />
                     </label>
 
-                    <button
-                      type="submit"
-                      class="button-primary"
-                      style="justify-content: center"
-                    >
-                      Kaydet
-                    </button>
-
-                    <div
-                      id="editEventMsg"
-                      style="margin-top: 6px; font-size: 12px"
-                    ></div>
+                    <div class="form-actions">
+                      <button
+                        type="submit"
+                        class="button-primary"
+                        style="justify-content: center"
+                      >
+                        Kaydet
+                      </button>
+                      <div
+                        id="editEventMsg"
+                        style="margin-top: 6px; font-size: 12px"
+                      ></div>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -322,18 +357,19 @@
                       <input id="createEventImage" type="text" />
                     </label>
 
-                    <button
-                      type="submit"
-                      class="button-primary"
-                      style="justify-content: center"
-                    >
-                      Oluştur
-                    </button>
-
-                    <div
-                      id="createEventMsg"
-                      style="margin-top: 6px; font-size: 12px"
-                    ></div>
+                    <div class="form-actions">
+                      <button
+                        type="submit"
+                        class="button-primary"
+                        style="justify-content: center"
+                      >
+                        Oluştur
+                      </button>
+                      <div
+                        id="createEventMsg"
+                        style="margin-top: 6px; font-size: 12px"
+                      ></div>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -384,8 +420,8 @@
                 <div id="pendingRequests">Yükleniyor…</div>
               </div>
 
-              <div class="card" style="margin-top: 18px">
-                <div class="card-header">
+              <div class="card" style="margin-top: 16px">
+                <div class="card-header card-header-split">
                   <div>
                     <div class="card-title">Tüm Üyeler</div>
                     <div class="card-subtitle">
@@ -411,19 +447,9 @@
             <!-- DUYURULAR -->
             <section id="page-announcements" class="page-view">
               <div class="card">
-                <div
-                  class="card-header"
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  "
-                >
+                <div class="card-header card-header-split">
                   <div>
                     <div class="card-title">Duyurular</div>
-                    <div class="card-subtitle">
-                      Kulübüne ait duyuruları yönet.
-                    </div>
                   </div>
 
                   <button
@@ -438,6 +464,7 @@
                   Yükleniyor...
                 </div>
               </div>
+
               <div
                 id="createAnnouncementModal"
                 class="modal"
@@ -474,18 +501,20 @@
                       ></textarea>
                     </label>
 
-                    <button
-                      type="submit"
-                      class="button-primary"
-                      style="justify-content: center"
-                    >
-                      Oluştur
-                    </button>
+                    <div class="form-actions">
+                      <button
+                        type="submit"
+                        class="button-primary"
+                        style="justify-content: center"
+                      >
+                        Oluştur
+                      </button>
 
-                    <div
-                      id="announcementMsg"
-                      style="margin-top: 6px; font-size: 12px"
-                    ></div>
+                      <div
+                        id="announcementMsg"
+                        style="margin-top: 6px; font-size: 12px"
+                      ></div>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -495,32 +524,6 @@
       </div>
     </div>
 
-    <!-- Mevcut JS -->
     <script src="admin.js"></script>
-
-    <!-- Sidebar tab geçişleri -->
-    <script>
-      const sidebarItems = document.querySelectorAll(".sidebar-item");
-      const pages = document.querySelectorAll(".page-view");
-
-      sidebarItems.forEach((item) => {
-        item.addEventListener("click", () => {
-          const target = item.getAttribute("data-page");
-
-          // aktif item değişimi
-          sidebarItems.forEach((i) => i.classList.remove("active"));
-          item.classList.add("active");
-
-          // sayfa görünürlüğü
-          pages.forEach((page) => {
-            if (page.id === "page-" + target) {
-              page.classList.add("active");
-            } else {
-              page.classList.remove("active");
-            }
-          });
-        });
-      });
-    </script>
   </body>
 </html>

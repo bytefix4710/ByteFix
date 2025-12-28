@@ -71,8 +71,8 @@ class Club(Base):
     description = Column("aciklama", String(500), nullable=True)
 
     # --- yeni alanlar ---
-    mission = Column("misyon", Text, nullable=True)
-    vision = Column("vizyon", Text, nullable=True)
+    mission = Column("misyon", String(500), nullable=True)
+    vision = Column("vizyon", String(500), nullable=True)
     image_url = Column("resim", String(500), nullable=True)  # dosya adı / URL
 
     admin_user = relationship("ClubAdmin", back_populates="clubs")

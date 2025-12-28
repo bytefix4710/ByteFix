@@ -130,19 +130,78 @@ async function loadClub() {
 
     if (clubInfoDiv) {
       clubInfoDiv.innerHTML = `
-        <h2>Kulübüm</h2>
-        <p><span class="label">Kulüp ID:</span> ${club.id}</p>
-        <p><span class="label">Ad:</span> ${club.name}</p>
-        <p><span class="label">Açıklama:</span> ${club.description || "-"}</p>
-        <p><span class="label">E-posta:</span> ${club.email || "-"}</p>
-        <p><span class="label">Telefon:</span> ${club.phone || "-"}</p>
-      `;
+  <div class="feature-block">
+    <div class="club-head">
+      <div>
+        <h2 class="club-title">
+          <span class="club-icon">🏛️</span>
+          <span>${club.name}</span>
+        </h2>
+
+        <div class="club-badges">
+          <span class="pill pill-accent"><span class="pill-icon">🆔</span> ID: ${
+            club.id
+          }</span>
+          <span class="pill pill-success"><span class="pill-icon">👤</span> Admin ID: ${
+            club.admin_id ?? "-"
+          }</span>
+        </div>
+      </div>
+
+      <!-- burası sadece görünüm: club edit/sil senin panelde yoksa kaldırabilirsin -->
+    </div>
+
+    <div style="margin-top: 14px;">
+      <div class="event-desc-block" style="color: var(--text-main); opacity: .9;">
+        ${club.description || "Açıklama yok"}
+      </div>
+    </div>
+
+    <div class="feature-grid-2">
+      <div class="feature-block" style="padding: 14px 16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <span style="font-size:18px;">🎯</span>
+          <strong style="color: var(--accent); font-size: 13px;">Misyon</strong>
+        </div>
+        <div style="color: var(--text-muted); font-size:13px; line-height:1.6;">
+          ${club.mission || "-"}
+        </div>
+      </div>
+
+      <div class="feature-block" style="padding: 14px 16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <span style="font-size:18px;">👁️</span>
+          <strong style="color: var(--accent); font-size: 13px;">Vizyon</strong>
+        </div>
+        <div style="color: var(--text-muted); font-size:13px; line-height:1.6;">
+          ${club.vision || "-"}
+        </div>
+      </div>
+    </div>
+
+    <div class="club-contact">
+      <div class="contact-item">
+        <span>📧</span>
+        <span>${club.email || "-"}</span>
+      </div>
+      <div class="contact-item">
+        <span>📞</span>
+        <span>${club.phone || "-"}</span>
+      </div>
+    </div>
+  </div>
+`;
     }
 
     const nameInput = document.getElementById("clubNameInput");
     const descInput = document.getElementById("clubDescInput");
     const emailInput = document.getElementById("clubEmailInput");
     const phoneInput = document.getElementById("clubPhoneInput");
+    const missionInput = document.getElementById("clubMissionInput");
+    const visionInput = document.getElementById("clubVisionInput");
+
+    if (missionInput) missionInput.value = club.mission || "";
+    if (visionInput) visionInput.value = club.vision || "";
 
     if (nameInput) nameInput.value = club.name || "";
     if (descInput) descInput.value = club.description || "";
@@ -237,6 +296,29 @@ if (overviewExists) {
 
 // ------- Kulüp bilgilerini güncelle -------
 
+window.openEditClubModal = function () {
+  const modal = document.getElementById("editClubModal");
+  if (!modal) return;
+
+  // loadClub zaten inputları dolduruyor.
+  // Ama garanti olsun diye açarken de loadClub çağırabilirsin:
+  // loadClub();
+
+  // mesajı temizle
+  const statusMsg = document.getElementById("statusMsg");
+  if (statusMsg) {
+    statusMsg.textContent = "";
+    statusMsg.classList.remove("status-error", "status-success");
+  }
+
+  modal.style.display = "flex";
+};
+
+window.closeEditClubModal = function () {
+  const modal = document.getElementById("editClubModal");
+  if (modal) modal.style.display = "none";
+};
+
 if (clubForm) {
   clubForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -250,6 +332,10 @@ if (clubForm) {
     const description = document.getElementById("clubDescInput").value.trim();
     const email = document.getElementById("clubEmailInput").value.trim();
     const phone = document.getElementById("clubPhoneInput").value.trim();
+    const mission =
+      document.getElementById("clubMissionInput")?.value.trim() || "";
+    const vision =
+      document.getElementById("clubVisionInput")?.value.trim() || "";
 
     try {
       const res = await fetch(`${API}/club-admin/club/me`, {
@@ -263,6 +349,8 @@ if (clubForm) {
           description,
           email,
           phone,
+          mission: mission || null,
+          vision: vision || null,
         }),
       });
 
@@ -282,6 +370,9 @@ if (clubForm) {
       }
 
       await loadClub();
+      setTimeout(() => {
+        closeEditClubModal();
+      }, 500);
     } catch (err) {
       console.error(err);
       if (statusMsg) {
@@ -508,50 +599,47 @@ async function loadEvents() {
         const img = (e.image_url || "").trim();
 
         return `
-          <div class="event-card">
-            <div class="event-card-inner">
-              <div>
-                <h3 class="event-title">${e.name}</h3>
+  <div class="event-card">
+    <div class="event-card-inner">
+      <div>
+        <h3 class="event-title">📅 ${e.name}</h3>
 
-                <div class="event-meta">
-                  <span class="event-date">${formatted}</span>
-                </div>
+        <div class="event-badges">
+          <span class="pill pill-muted">
+            <span class="pill-icon">🏛️</span>
+            ${escapeHtml(e.kulup_name || "Kulüp")}
+          </span>
+          <span class="pill pill-success">
+            <span class="pill-icon">🕐</span>
+            ${formatted}
+          </span>
+        </div>
 
-                ${
-                  desc
-                    ? `<p class="event-desc">${desc}</p>`
-                    : `<p class="event-desc" style="color: var(--text-muted);">(Açıklama yok)</p>`
-                }
+        ${
+          desc
+            ? `<div class="event-desc-block">${escapeHtml(desc)}</div>`
+            : `<div class="event-desc-block" style="opacity:.75;">(Açıklama yok)</div>`
+        }
+      </div>
 
-                <div class="event-foot">
-                  ${
-                    img
-                      ? `<span>Foto: <code>${img}</code></span>`
-                      : `<span style="opacity:.75;">Foto yok</span>`
-                  }
-                </div>
-              </div>
-
-              <div class="event-actions">
-                <button class="button-ghost" onclick="openRegsModal(${
-                  e.etkinlik_id
-                })">
-                  Kayıtlar
-                </button>
-                <button class="button-primary" onclick="openEditEventModal(${
-                  e.etkinlik_id
-                })">
-                  Düzenle
-                </button>
-                <button class="button-ghost btn-danger" onclick="deleteEvent(${
-                  e.etkinlik_id
-                })">
-                  Sil
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
+      <div class="event-actions">
+        <button class="button-ghost" onclick="openRegsModal(${e.etkinlik_id})">
+          Kayıtlar
+        </button>
+        <button class="button-primary" onclick="openEditEventModal(${
+          e.etkinlik_id
+        })">
+          Düzenle
+        </button>
+        <button class="button-ghost btn-danger" onclick="deleteEvent(${
+          e.etkinlik_id
+        })">
+          Sil
+        </button>
+      </div>
+    </div>
+  </div>
+`;
       })
       .join("")}
   </div>
@@ -997,44 +1085,64 @@ async function loadAnnouncements() {
     return;
   }
 
-  box.innerHTML = anns
-    .map((a) => {
-      const dateText = new Date(a.created_at).toLocaleString("tr-TR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+  box.innerHTML = `
+    <div class="ann-grid">
+      ${anns
+        .map((a) => {
+          const d = new Date(a.created_at);
 
-      return `
-      <div class="event-card" style="padding:14px;">
-        <div class="event-card-inner" style="grid-template-columns:minmax(0,1fr) 140px;">
-          <div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <div class="event-title" style="margin:0;">${escapeHtml(
-                a.title
-              )}</div>
-              <span class="event-date">${dateText}</span>
+          // Görsel tarih formatı
+          const dateText = d.toLocaleString("tr-TR", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          // küçük “DD.MM.YYYY” tarzı chip istersek:
+          const compact = d.toLocaleDateString("tr-TR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+
+          return `
+            <div class="ann-card">
+              <div class="ann-card-inner">
+                <div class="ann-body">
+                  <div class="ann-head">
+                    <div class="ann-title">
+                      <span class="ann-icon">📣</span>
+                      <span>${escapeHtml(a.title)}</span>
+                    </div>
+
+                    <div class="ann-meta">
+                      <span class="ann-chip">
+                        🕒 ${compact}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p class="ann-desc">
+                    ${escapeHtml(a.description)}
+                  </p>
+                </div>
+
+                <div class="ann-actions">
+                  <button class="button-ghost btn-danger" onclick="deleteAnnouncement(${
+                    a.duyuru_id
+                  })">
+                    Sil
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <p class="event-desc" style="margin-top:8px;">
-              ${escapeHtml(a.description)}
-            </p>
-          </div>
-
-          <div class="event-actions">
-            <button class="button-ghost btn-danger" onclick="deleteAnnouncement(${
-              a.duyuru_id
-            })">
-              Sil
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-    })
-    .join("");
+          `;
+        })
+        .join("")}
+    </div>
+  `;
 }
 
 window.deleteAnnouncement = async function (duyuruId) {

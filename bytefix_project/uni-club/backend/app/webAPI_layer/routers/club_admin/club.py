@@ -21,6 +21,8 @@ def get_my_club(admin=Depends(get_current_admin), db: Session = Depends(get_db))
         email=club.email,
         phone=club.phone,
         admin_id=club.admin_id,
+        mission=club.mission,
+        vision=club.vision,
     )
 
 
@@ -34,8 +36,20 @@ def update_my_club(payload: ClubUpdate, admin=Depends(get_current_admin), db: Se
     if payload.description: club.description = payload.description
     if payload.email: club.email = payload.email
     if payload.phone: club.phone = payload.phone
+    if payload.mission: club.mission = payload.mission
+    if payload.vision: club.vision = payload.vision
 
     db.commit()
     db.refresh(club)
 
-    return club
+    # ✅ GET ile aynı şekilde map et
+    return ClubPublic(
+        id=club.kulup_id,
+        name=club.name,
+        description=club.description,
+        email=club.email,
+        phone=club.phone,
+        admin_id=club.admin_id,
+        mission=club.mission,
+        vision=club.vision,
+    )

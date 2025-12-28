@@ -22,6 +22,9 @@ class ClubUpdate(BaseModel):
     description: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    mission: Optional[str] = None
+    vision: Optional[str] = None
+
 
 class ClubPublic(BaseModel):
     id: int
@@ -30,9 +33,12 @@ class ClubPublic(BaseModel):
     email: Optional[str]
     phone: Optional[str]
     admin_id: Optional[int]
+    mission: Optional[str] = None
+    vision: Optional[str] = None
 
     class Config:
         orm_mode = True
+
 
 class EventCreate(BaseModel):
     name: str
