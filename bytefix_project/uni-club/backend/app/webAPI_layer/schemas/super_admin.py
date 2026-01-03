@@ -66,6 +66,22 @@ class EventPublic(BaseModel):
     class Config:
         orm_mode = True
 
+class AnnouncementPublic(BaseModel):
+    duyuru_id: int
+    kulup_id: Optional[int] = None
+    kulup_name: Optional[str] = None
+    title: str
+    description: str
+    created_at: str
+    
+    class Config:
+        orm_mode = True
+
+class AnnouncementCreate(BaseModel):
+    title: str
+    description: str
+    kulup_id: Optional[int] = None  # None ise sistem geneli
+
 class UserPublic(BaseModel):
     user_type: str  # "member" veya "admin"
     id: str  # ogrenci_no veya hesap_id

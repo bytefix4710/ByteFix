@@ -90,6 +90,8 @@ function showPage(pageName) {
     loadUsers();
   } else if (pageName === "events") {
     loadEvents();
+  } else if (pageName === "announcements") {
+    loadAnnouncements();
   }
 }
 
@@ -851,10 +853,10 @@ function renderEvents() {
 
   // Filtre değerlerini al
   const clubFilter = document.getElementById("eventClubFilter");
-  const startDateFilter = document.getElementById("eventStartDateFilter");
+  const dateFilter = document.getElementById("eventDateFilter");
 
   const clubFilterValue = clubFilter ? clubFilter.value : "";
-  const startDateValue = startDateFilter ? startDateFilter.value : "";
+  const dateValue = dateFilter ? dateFilter.value : "";
 
   // Filtreleme
   let filtered = eventsCache;
@@ -866,20 +868,26 @@ function renderEvents() {
     }
   }
 
-  if (startDateValue) {
-    const startDate = new Date(startDateValue);
+  if (dateValue) {
+    const filterDate = new Date(dateValue);
+    filterDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(filterDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    
     filtered = filtered.filter((event) => {
       const eventDate = new Date(event.datetime);
-      return eventDate >= startDate;
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= filterDate && eventDate < nextDay;
     });
   }
 
   if (filtered.length === 0) {
+    const hasFilters = clubFilterValue || dateValue;
     eventsListDiv.innerHTML = `
       <div style="text-align: center; padding: 60px 20px; margin-top: 20px;">
         <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">📅</div>
-        <h3 style="color: var(--text-muted); font-size: 18px; font-weight: 500; margin: 0 0 8px 0;">Etkinlik bulunamadı</h3>
-        <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Bu filtreye uygun etkinlik bulunmuyor. Filtreleri değiştirip tekrar deneyin.</p>
+        <h3 style="color: var(--text-muted); font-size: 18px; font-weight: 500; margin: 0 0 8px 0;">${hasFilters ? "Etkinlik bulunamadı" : "Henüz etkinlik yok"}</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin: 0;">${hasFilters ? "Bu filtreye uygun etkinlik bulunmuyor. Filtreleri değiştirip tekrar deneyin." : "Sistemde henüz etkinlik bulunmuyor."}</p>
       </div>
     `;
     return;
@@ -942,12 +950,10 @@ function renderEvents() {
 // Filtreleri temizle fonksiyonu
 window.clearEventFilters = function() {
   const clubFilter = document.getElementById("eventClubFilter");
-  const startDateFilter = document.getElementById("eventStartDateFilter");
-  const endDateFilter = document.getElementById("eventEndDateFilter");
+  const dateFilter = document.getElementById("eventDateFilter");
 
   if (clubFilter) clubFilter.value = "";
-  if (startDateFilter) startDateFilter.value = "";
-  if (endDateFilter) endDateFilter.value = "";
+  if (dateFilter) dateFilter.value = "";
 
   renderEvents();
 };
@@ -960,16 +966,341 @@ if (eventClubFilterInput) {
   });
 }
 
-const eventStartDateFilterInput = document.getElementById("eventStartDateFilter");
-if (eventStartDateFilterInput) {
-  eventStartDateFilterInput.addEventListener("change", () => {
+const eventDateFilterInput = document.getElementById("eventDateFilter");
+if (eventDateFilterInput) {
+  eventDateFilterInput.addEventListener("change", () => {
     renderEvents();
   });
 }
 
-const eventEndDateFilterInput = document.getElementById("eventEndDateFilter");
-if (eventEndDateFilterInput) {
-  eventEndDateFilterInput.addEventListener("change", () => {
-    renderEvents();
+// ------- DUYURULAR SAYFASI -------
+
+let announcementsCache = [];
+let clubsCacheForAnnouncements = [];
+
+async function loadAnnouncements() {
+  const token = getToken();
+  if (!token) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const announcementsListDiv = document.getElementById("announcementsList");
+  if (!announcementsListDiv) return;
+
+  try {
+    announcementsListDiv.innerHTML = "<p style='color: var(--text-muted)'>Yükleniyor...</p>";
+
+    // Önce kulüpleri yükle (filtre için)
+    const clubsRes = await fetch(`${API}/super-admin/clubs`, {
+      headers: { ...authHeader() },
+    });
+    if (clubsRes.ok) {
+      clubsCacheForAnnouncements = await clubsRes.json();
+      populateAnnouncementClubFilter();
+    }
+
+    // Duyuruları yükle
+    const res = await fetch(`${API}/super-admin/announcements`, {
+      headers: { ...authHeader() },
+    });
+
+    if (res.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error("Duyurular yüklenemedi.");
+    }
+
+    announcementsCache = await res.json();
+    renderAnnouncements();
+  } catch (err) {
+    console.error(err);
+    if (announcementsListDiv) {
+      announcementsListDiv.innerHTML = "<p style='color: red; font-size: 13px;'>Duyurular yüklenirken hata oluştu.</p>";
+    }
+  }
+}
+
+function populateAnnouncementClubFilter() {
+  const clubFilter = document.getElementById("announcementClubFilter");
+  const clubSelect = document.getElementById("announcementClubSelect");
+  
+  if (clubFilter) {
+    const currentValue = clubFilter.value;
+    clubFilter.innerHTML = '<option value="">🏛️ Tüm Kulüpler</option>';
+    clubsCacheForAnnouncements.forEach((club) => {
+      const option = document.createElement("option");
+      option.value = club.id;
+      option.textContent = club.name;
+      clubFilter.appendChild(option);
+    });
+    if (currentValue) clubFilter.value = currentValue;
+  }
+
+  if (clubSelect) {
+    clubSelect.innerHTML = '<option value="">🌐 Tüm Kulüpler (Sistem Geneli)</option>';
+    clubsCacheForAnnouncements.forEach((club) => {
+      const option = document.createElement("option");
+      option.value = club.id;
+      option.textContent = club.name;
+      clubSelect.appendChild(option);
+    });
+  }
+}
+
+function renderAnnouncements() {
+  const announcementsListDiv = document.getElementById("announcementsList");
+  if (!announcementsListDiv) return;
+
+  // Filtre değerlerini al
+  const clubFilter = document.getElementById("announcementClubFilter");
+  const dateFilter = document.getElementById("announcementDateFilter");
+  const typeFilter = document.getElementById("announcementTypeFilter");
+
+  const clubFilterValue = clubFilter ? clubFilter.value : "";
+  const dateValue = dateFilter ? dateFilter.value : "";
+  const typeValue = typeFilter ? typeFilter.value : "all";
+
+  // Filtreleme
+  let filtered = announcementsCache;
+
+  if (clubFilterValue) {
+    const clubIdNum = parseInt(clubFilterValue);
+    if (!isNaN(clubIdNum)) {
+      filtered = filtered.filter((ann) => ann.kulup_id === clubIdNum);
+    }
+  }
+
+  if (dateValue) {
+    const filterDate = new Date(dateValue);
+    filterDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(filterDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    
+    filtered = filtered.filter((ann) => {
+      const annDate = new Date(ann.created_at);
+      annDate.setHours(0, 0, 0, 0);
+      return annDate >= filterDate && annDate < nextDay;
+    });
+  }
+
+  if (typeValue === "system") {
+    filtered = filtered.filter((ann) => ann.kulup_id === null || ann.kulup_name === "Sistem Geneli");
+  } else if (typeValue === "club") {
+    filtered = filtered.filter((ann) => ann.kulup_id !== null && ann.kulup_name !== "Sistem Geneli");
+  }
+
+  if (filtered.length === 0) {
+    announcementsListDiv.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; margin-top: 20px;">
+        <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.5;">📢</div>
+        <h3 style="color: var(--text-muted); font-size: 18px; font-weight: 500; margin: 0 0 8px 0;">Duyuru bulunamadı</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Bu filtreye uygun duyuru bulunmuyor. Filtreleri değiştirip tekrar deneyin.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const announcementsHtml = filtered
+    .map((ann) => {
+      const formattedDate = new Date(ann.created_at).toLocaleString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const isSystemWide = ann.kulup_id === null || ann.kulup_name === "Sistem Geneli";
+
+      return `
+        <div class="card" style="padding: 24px; border: 1px solid rgba(99, 102, 241, 0.15); background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%); transition: all 0.3s ease; position: relative; overflow: hidden; margin-bottom: 16px;"
+             onmouseover="this.style.borderColor='rgba(99, 102, 241, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(99, 102, 241, 0.15)'"
+             onmouseout="this.style.borderColor='rgba(99, 102, 241, 0.15)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+          <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; position: relative; z-index: 1">
+            <div style="flex: 1">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px">
+                <span style="font-size: 24px;">📢</span>
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600; background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${escapeHtml(ann.title)}</h3>
+              </div>
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px">
+                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: ${isSystemWide ? 'rgba(139, 92, 246, 0.1)' : 'rgba(99, 102, 241, 0.1)'}; border-radius: 12px; font-size: 12px; color: ${isSystemWide ? '#a78bfa' : 'var(--accent)'}; border: 1px solid ${isSystemWide ? 'rgba(139, 92, 246, 0.2)' : 'rgba(99, 102, 241, 0.2)'};">
+                  <span>${isSystemWide ? '🌐' : '🏛️'}</span>
+                  <span>${escapeHtml(ann.kulup_name || "Sistem Geneli")}</span>
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; font-size: 12px; color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2);">
+                  <span>🕐</span>
+                  <span>${formattedDate}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 16px; padding: 14px; background: rgba(148, 163, 184, 0.05); border-left: 3px solid var(--accent); border-radius: var(--radius-md);">
+            <p style="margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.6;">${escapeHtml(ann.description)}</p>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  announcementsListDiv.innerHTML = announcementsHtml;
+}
+
+// Filtreleri temizle fonksiyonu
+window.clearAnnouncementFilters = function() {
+  const clubFilter = document.getElementById("announcementClubFilter");
+  const dateFilter = document.getElementById("announcementDateFilter");
+  const typeFilter = document.getElementById("announcementTypeFilter");
+
+  if (clubFilter) clubFilter.value = "";
+  if (dateFilter) dateFilter.value = "";
+  if (typeFilter) typeFilter.value = "all";
+
+  renderAnnouncements();
+};
+
+// Filtre event listener'ları
+const announcementClubFilterInput = document.getElementById("announcementClubFilter");
+if (announcementClubFilterInput) {
+  announcementClubFilterInput.addEventListener("change", () => {
+    renderAnnouncements();
+  });
+}
+
+const announcementDateFilterInput = document.getElementById("announcementDateFilter");
+if (announcementDateFilterInput) {
+  announcementDateFilterInput.addEventListener("change", () => {
+    renderAnnouncements();
+  });
+}
+
+const announcementTypeFilterInput = document.getElementById("announcementTypeFilter");
+if (announcementTypeFilterInput) {
+  announcementTypeFilterInput.addEventListener("change", () => {
+    renderAnnouncements();
+  });
+}
+
+// Duyuru oluşturma modal fonksiyonları
+window.openCreateAnnouncementModal = function() {
+  const modal = document.getElementById("announcementModal");
+  if (!modal) return;
+
+  document.getElementById("announcementForm").reset();
+  document.getElementById("announcementStatusMsg").textContent = "";
+  document.getElementById("announcementStatusMsg").classList.remove("status-error", "status-success");
+
+  // Kulüpleri yükle
+  if (clubsCacheForAnnouncements.length === 0) {
+    fetch(`${API}/super-admin/clubs`, {
+      headers: { ...authHeader() },
+    })
+      .then((res) => res.json())
+      .then((clubs) => {
+        clubsCacheForAnnouncements = clubs;
+        populateAnnouncementClubFilter();
+      });
+  } else {
+    populateAnnouncementClubFilter();
+  }
+
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+};
+
+window.closeAnnouncementModal = function() {
+  const modal = document.getElementById("announcementModal");
+  if (modal) {
+    modal.style.display = "none";
+    document.body.style.overflow = "";
+    const statusMsg = document.getElementById("announcementStatusMsg");
+    if (statusMsg) {
+      statusMsg.textContent = "";
+      statusMsg.classList.remove("status-error", "status-success");
+    }
+  }
+};
+
+// Duyuru form submit
+const announcementForm = document.getElementById("announcementForm");
+if (announcementForm) {
+  announcementForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const statusMsg = document.getElementById("announcementStatusMsg");
+    if (statusMsg) {
+      statusMsg.textContent = "";
+      statusMsg.classList.remove("status-error", "status-success");
+    }
+
+    const title = document.getElementById("announcementTitleInput").value.trim();
+    const description = document.getElementById("announcementDescInput").value.trim();
+    const clubId = document.getElementById("announcementClubSelect").value;
+
+    if (!title || !description) {
+      if (statusMsg) {
+        statusMsg.textContent = "Başlık ve içerik zorunludur.";
+        statusMsg.classList.add("status-error");
+      }
+      return;
+    }
+
+    try {
+      const payload = {
+        title,
+        description,
+        kulup_id: clubId ? parseInt(clubId) : null,
+      };
+
+      const res = await fetch(`${API}/super-admin/announcements`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeader(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 401) {
+        logout();
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || "Duyuru oluşturulamadı.");
+      }
+
+      if (statusMsg) {
+        statusMsg.textContent = "Duyuru başarıyla oluşturuldu ✅";
+        statusMsg.classList.add("status-success");
+      }
+
+      await loadAnnouncements();
+      setTimeout(() => {
+        closeAnnouncementModal();
+      }, 1000);
+    } catch (err) {
+      console.error(err);
+      if (statusMsg) {
+        statusMsg.textContent = err.message;
+        statusMsg.classList.add("status-error");
+      }
+    }
+  });
+}
+
+// Modal dışına tıklandığında kapat
+const announcementModal = document.getElementById("announcementModal");
+if (announcementModal) {
+  announcementModal.addEventListener("click", (e) => {
+    if (e.target === announcementModal) {
+      closeAnnouncementModal();
+    }
   });
 }
