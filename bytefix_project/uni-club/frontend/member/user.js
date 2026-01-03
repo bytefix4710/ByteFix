@@ -4,9 +4,9 @@ let MODAL_OPEN = false;
 // Kulüp foto mapping (id -> dosya listesi)
 // Dosyalar: frontend/assets/clubs/
 const CLUB_PHOTOS = {
-  1: ["bilmuh_1.jpg", "bilmuh_2.jpg"],
-  2: ["foto_1.jpg", "foto_2.jpg"],
-  3: ["muzik_1.jpg", "muzik_2.jpg"],
+  1: ["bilmuh_1.jpg", "bilmuh_2.jpg", "bilmuh_3.jpg", "bilmuh_4.jpg"],
+  2: ["foto_1.jpg", "foto_2.jpg", "foto_3.jpg", "foto_4.jpg"],
+  3: ["muzik_1.jpg", "muzik_2.jpg", "muzik_3.jpg", "muzik_4.jpg"],
 };
 const CLUB_PHOTO_BASE = "../assets/clubs/";
 
@@ -146,11 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // ------- DASHBOARD INIT -------
   if (document.getElementById("page-overview")) {
     console.log("✅ Dashboard yüklendi.");
-    loadProfile();
-    loadClubs();
-    loadMembershipOverview();
-    loadOverviewAnnouncements();
-    loadOverviewEvents();
+    // Force UI state sync
+    const startPage = getActivePage() || "overview";
+    if (typeof showPage === "function") {
+      showPage(startPage);
+    }
   }
 
   // ------- GLOBAL CLICK HANDLER (Kulüp listesi) -------
@@ -205,20 +205,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("clubDetailModal");
   if (closeBtn && modal) {
     closeBtn.addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  modal.style.display = "none";
-document.body.classList.remove("modal-open");
-MODAL_OPEN = false; // 🔥 KİLİT AÇ
-});
+      e.preventDefault();
+      e.stopPropagation();
+      modal.style.display = "none";
+      document.body.classList.remove("modal-open");
+      MODAL_OPEN = false; // 🔥 KİLİT AÇ
+    });
 
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.style.display = "none";
-document.body.classList.remove("modal-open");
-MODAL_OPEN = false; // 🔥 KİLİT AÇ
-  }
-});
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        document.body.classList.remove("modal-open");
+        MODAL_OPEN = false; // 🔥 KİLİT AÇ
+      }
+    });
 
 
     // modal card içi tıklamalar overlay'e / sayfaya taşmasın
@@ -235,24 +235,43 @@ MODAL_OPEN = false; // 🔥 KİLİT AÇ
 // Page Routing
 // ==============================
 function showPage(pageName) {
-      if (MODAL_OPEN) {
+  if (MODAL_OPEN) {
     console.log("⛔ Modal açıkken routing iptal edildi");
     return;
   }
+
+  // 1. Hide all pages
   document.querySelectorAll(".page-view").forEach((view) => {
     view.classList.remove("active");
+    view.style.display = "none"; // JS Force Hide
+    view.style.visibility = "hidden"; // Extra safety
+    view.style.height = "0";
+    view.style.overflow = "hidden";
   });
 
+  // 2. Deactivate sidebar items
   document.querySelectorAll(".sidebar-item").forEach((item) => {
     item.classList.remove("active");
   });
 
+  // 3. Show target page
   const pageView = document.getElementById(`page-${pageName}`);
-  if (pageView) pageView.classList.add("active");
+  if (pageView) {
+    pageView.classList.add("active");
+    // JS Force Show
+    pageView.style.display = "block";
+    pageView.style.visibility = "visible";
+    pageView.style.height = "auto";
+    pageView.style.overflow = "visible";
+  } else {
+    console.error(`❌ Sayfa bulunamadı: page-${pageName}`);
+  }
 
+  // 4. Activate sidebar item
   const sidebarItem = document.querySelector(`[data-page="${pageName}"]`);
   if (sidebarItem) sidebarItem.classList.add("active");
 
+  // 5. Load data
   if (pageName === "overview") {
     loadProfile();
     loadMembershipOverview();
@@ -288,6 +307,9 @@ async function loadProfile() {
     const user = await res.json();
     const badge = document.getElementById("userEmailBadge");
     if (badge) badge.textContent = user.email;
+
+    const wName = document.getElementById("userWelcomeName");
+    if (wName) wName.textContent = user.first_name || user.email.split("@")[0];
 
     const pInfo = document.getElementById("profileInfo");
     if (pInfo) {
@@ -342,30 +364,28 @@ function updateOverviewUI(data) {
   const statClubsList = document.getElementById("statClubsList");
   const statPendingList = document.getElementById("statPendingList");
 
-  if (statClubsCount) statClubsCount.textContent = approved.length || "-";
-  if (statPendingCount) statPendingCount.textContent = pending.length || "-";
+  if (statClubsCount) statClubsCount.textContent = approved.length;
+  if (statPendingCount) statPendingCount.textContent = pending.length;
 
-  if (statClubsList) {
-    if (approved.length === 0) {
-      statClubsList.textContent = "Henüz üye olduğunuz kulüp bulunmuyor.";
-    } else {
-      statClubsList.innerHTML =
-        `<ul class="stat-sublist-list">` +
-        approved.map((c) => `<li>${c.name}</li>`).join("") +
-        `</ul>`;
-    }
-  }
+  const renderList = (list) => {
+    if (list.length === 0) return `<div style="font-size: 12px; color: var(--text-muted); padding-top: 4px; padding-left: 16px;">Liste boş</div>`;
+    const visible = list.slice(0, 3);
+    const hiddenCount = list.length - visible.length;
 
-  if (statPendingList) {
-    if (pending.length === 0) {
-      statPendingList.textContent = "Bekleyen üyelik başvurunuz bulunmuyor.";
-    } else {
-      statPendingList.innerHTML =
-        `<ul class="stat-sublist-list">` +
-        pending.map((c) => `<li>${c.name}</li>`).join("") +
-        `</ul>`;
+    let html = `<ul style="list-style: none; padding: 0 0 0 16px; margin-top: 8px; font-size: 13px; color: var(--text-muted);">`;
+    html += visible.map(c =>
+      `<li style="margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">• ${escapeHtml(c.name)}</li>`
+    ).join("");
+
+    if (hiddenCount > 0) {
+      html += `<li style="font-size: 11px; opacity: 0.7; margin-top: 4px;">+ ${hiddenCount} kulüp daha</li>`;
     }
-  }
+    html += `</ul>`;
+    return html;
+  };
+
+  if (statClubsList) statClubsList.innerHTML = renderList(approved);
+  if (statPendingList) statPendingList.innerHTML = renderList(pending);
 }
 
 // ==============================
@@ -380,24 +400,44 @@ async function loadClubs() {
     const clubs = await res.json();
 
     if (Array.isArray(clubs) && clubs.length > 0) {
-      let html = `<ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">`;
+      // Use Grid layout similar to Super Admin
+      let html = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">`;
       clubs.forEach((c) => {
         html += `
-          <li class="club-item" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div>
-              <div class="club-name">${c.name}</div>
-              <div class="club-desc">${c.description || ""}</div>
+          <div class="card-fancy">
+            <div class="card-fancy-bg"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; position: relative; z-index: 1;">
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <span style="font-size: 24px;">🏛️</span>
+                  <div class="text-gradient" style="font-size: 18px; font-weight: 700;">${escapeHtml(c.name)}</div>
+                </div>
+              </div>
             </div>
-            <div class="club-actions">
-              <button class="chip club-detail-btn" data-club-id="${c.id}">Detay</button>
-              <button class="chip club-join-btn" data-club-id="${c.id}">Üye Ol</button>
+
+            ${c.image_url ? `
+            <div style="margin-bottom: 16px; border-radius: var(--radius-lg); overflow: hidden; height: 160px;">
+                <img src="${escapeHtml(c.image_url)}" alt="${escapeHtml(c.name)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.style.display='none'" />
+            </div>` : ""}
+
+            <div class="desc-box">
+               <p>${escapeHtml(c.description || "Açıklama bulunmuyor.")}</p>
             </div>
-          </li>`;
+
+            <div style="margin-top: auto; display: flex; gap: 10px; justify-content: flex-end; position: relative; z-index: 1;">
+               <button type="button" class="button-ghost button-small" onclick="showClubDetail('${c.id}'); event.preventDefault();">Detaylar</button>
+               <button type="button" class="button-primary button-small" onclick="showClubDetail('${c.id}'); event.preventDefault();">Kulübü İncele</button>
+            </div>
+          </div>`;
       });
-      html += `</ul>`;
+      html += `</div>`;
       container.innerHTML = html;
     } else {
-      container.textContent = "Henüz kulüp bulunamadı.";
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+           Henüz kulüp bulunamadı.
+        </div>`;
     }
   } catch (e) {
     console.error("Kulüp hatası:", e);
@@ -462,7 +502,7 @@ async function showClubDetail(clubId) {
         photosEl.innerHTML = `<p style="font-size:12px; color:var(--text-muted);">Bu kulüp için henüz fotoğraf eklenmemiş.</p>`;
       } else {
         photosEl.innerHTML = photos
-          .map((file) => `<img src="${CLUB_PHOTO_BASE}${file}" alt="Kulüp etkinlik fotoğrafı" onerror="this.style.display='none';" />`)
+          .map((file) => `<img src="${CLUB_PHOTO_BASE}${file}" alt="Kulüp etkinlik fotoğrafı" onclick="showPhotoLightbox('${CLUB_PHOTO_BASE}${file}')" style="cursor: pointer;" onerror="this.style.display='none';" />`)
           .join("");
       }
     }
@@ -491,11 +531,11 @@ async function showClubDetail(clubId) {
       }
     }
 
-   if (modal) {
-  modal.style.display = "flex";
-  document.body.classList.add("modal-open");
-  MODAL_OPEN = true; // 🔥 KİLİT
-}
+    if (modal) {
+      modal.style.display = "flex";
+      document.body.classList.add("modal-open");
+      MODAL_OPEN = true; // 🔥 KİLİT
+    }
   } catch (err) {
     console.error(err);
     if (msgEl) {
@@ -503,10 +543,10 @@ async function showClubDetail(clubId) {
       msgEl.className = "status-error";
     }
     if (modal) {
-  modal.style.display = "flex";
-  document.body.classList.add("modal-open");
-  MODAL_OPEN = true; // 🔥 KİLİT
-}
+      modal.style.display = "flex";
+      document.body.classList.add("modal-open");
+      MODAL_OPEN = true; // 🔥 KİLİT
+    }
   }
 }
 
@@ -542,17 +582,18 @@ async function joinClub(clubId) {
     let data = {};
     try {
       data = await res.json();
-    } catch (_) {}
+    } catch (_) { }
 
-   if (res.ok) {
-  msgEl.textContent = data.message || "Üyelik başvurunuz alındı.";
-  msgEl.className = "status-success";
+    if (res.ok) {
+      msgEl.textContent = data.message || "Üyelik başvurunuz alındı.";
+      msgEl.className = "status-success";
 
-  if (cancelBtn) cancelBtn.style.display = "inline-flex";
-
-  await loadMembershipOverview(); // ✅ sadece data güncelle
-  // ❌ showPage YOK
-}else if (res.status === 400) {
+      if (cancelBtn) cancelBtn.style.display = "inline-flex";
+      if (joinBtn) {
+        joinBtn.textContent = "Başvuru Yapıldı";
+        joinBtn.disabled = true;
+      }
+    } else if (res.status === 400) {
       msgEl.textContent = data.detail || "Bu kulübe zaten başvurunuz bulunuyor.";
       msgEl.className = "status-warning";
       if (data.detail && data.detail.includes("başvuru yaptınız")) {
@@ -580,8 +621,6 @@ async function cancelMembership(clubId) {
   const cancelBtn = document.getElementById("btnCancelMembership");
   const token = getToken();
 
-  if (!msgEl) return;
-
   msgEl.className = "status-info";
 
   if (!token) {
@@ -589,8 +628,6 @@ async function cancelMembership(clubId) {
     msgEl.className = "status-error";
     return;
   }
-
-  const activePage = getActivePage();
 
   try {
     const res = await fetch(`${API}/members/clubs/${clubId}/join`, {
@@ -601,26 +638,25 @@ async function cancelMembership(clubId) {
     let data = {};
     try {
       data = await res.json();
-    } catch (_) {}
+    } catch (_) { }
 
     if (res.ok) {
-  msgEl.textContent = data.message || "Başvuru geri çekildi.";
-  msgEl.className = "status-success";
+      msgEl.textContent = data.message || "Başvuru geri çekildi.";
+      msgEl.className = "status-success";
 
-  if (cancelBtn) cancelBtn.style.display = "none";
-
-  await loadMembershipOverview(); // ✅ sadece overview güncelle
-  // ❌ showPage YOK
-}
- else {
-      msgEl.textContent =
-        data.detail || "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
+      if (cancelBtn) cancelBtn.style.display = "none";
+      const joinBtn = document.getElementById("btnJoinClub");
+      if (joinBtn) {
+        joinBtn.disabled = false;
+        joinBtn.textContent = "Üye Ol";
+      }
+    } else {
+      msgEl.textContent = data.detail || "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
       msgEl.className = "status-error";
     }
   } catch (err) {
     console.error(err);
-    msgEl.textContent =
-      "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
+    msgEl.textContent = "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
     msgEl.className = "status-error";
   }
 }
@@ -754,30 +790,53 @@ async function loadEvents() {
         }
 
         html += `
-          <div class="club-item" style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-            <div style="flex:1;">
-              <div class="club-name">${escapeHtml(ev.name || "")}</div>
+          <div class="card-fancy" style="margin-bottom: 0;">
+            <div class="list-item-fancy" style="border-bottom: none; padding: 0;">
+              <div class="list-item-content">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <div class="text-gradient" style="font-size: 16px; font-weight: 700;">${escapeHtml(ev.name || "")}</div>
+                    ${isFuture ?
+            `<span class="badge-outlined accent">Yaklaşan</span>` :
+            `<span class="badge-outlined muted">Geçmiş</span>`
+          }
+                </div>
 
-              <div class="club-desc" style="margin-top:4px;">
-                <b>${escapeHtml(ev.kulup_name || "")}</b> • ${evDate.toLocaleString("tr-TR")}
-              </div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                  <span style="color: var(--accent); font-weight: 600;">${escapeHtml(ev.kulup_name || "")}</span>
+                  • ${evDate.toLocaleString("tr-TR")}
+                </div>
             
-              <div class="club-desc" style="margin-top:4px; display:flex; gap:8px; align-items:center;">
-  ${ev.capacity != null ? `<span class="chip">Kontenjan: ${ev.capacity}</span>` : `<span class="chip">Kontenjan: -</span>`}
-  ${ev.is_full ? `<span class="chip" style="opacity:.9;">Dolu</span>` : `<span class="chip" style="opacity:.9;">Açık</span>`}
-</div>
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                   ${ev.capacity != null ? `<span class="badge-outlined muted">Kontenjan: ${ev.capacity}</span>` : `<span class="badge-outlined muted">Kontenjan: -</span>`}
+                   ${ev.is_full ? `<span class="badge-outlined danger">Dolu</span>` : `<span class="badge-outlined success">Yer Var</span>`}
+                </div>
 
-              <div class="club-desc" style="margin-top:6px;">
-                ${escapeHtml(ev.description || "")}
+                <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; opacity: 0.9;">
+                  ${escapeHtml(ev.description || "")}
+                </div>
+
+                ${capacityHtml}
+
+                <div id="eventMsg-${ev.etkinlik_id}" style="margin-top:8px; font-size:13px; min-height: 20px;"></div>
               </div>
 
-              ${capacityHtml}
-
-              <div id="eventMsg-${ev.etkinlik_id}" style="margin-top:8px; font-size:13px;"></div>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-              ${actionHtml}
+              <div class="list-item-actions" style="margin-left: 16px;">
+                ${isFuture ? (
+            ev.registered ?
+              `<button type="button" class="button-ghost button-small" 
+                            style="border-color: var(--danger); color: var(--danger);"
+                            onclick="cancelEvent('${ev.etkinlik_id}', event);">
+                            Başvuruyu Geri Çek
+                         </button>` :
+              (isFull ?
+                `<span class="badge-outlined danger" style="padding: 8px 12px;">Kontenjan Dolu</span>` :
+                `<button type="button" class="button-primary button-small" 
+                                onclick="registerEvent('${ev.etkinlik_id}', event);">
+                                Kayıt Ol
+                             </button>`)
+          ) : `<span class="badge-outlined muted">Süresi Doldu</span>`
+          }
+              </div>
             </div>
           </div>
         `;
@@ -818,10 +877,15 @@ function escapeHtml(str) {
 }
 
 
-async function registerEvent(eventId) {
+async function registerEvent(eventId, eventObj) {
+  if (eventObj) {
+    eventObj.preventDefault();
+    eventObj.stopPropagation();
+  }
+
   const msgEl = document.getElementById(`eventMsg-${eventId}`);
   if (msgEl) {
-    msgEl.textContent = "";
+    msgEl.textContent = "İşleniyor...";
     msgEl.className = "status-info";
   }
 
@@ -832,15 +896,16 @@ async function registerEvent(eventId) {
     });
 
     let data = {};
-    try { data = await res.json(); } catch (_) {}
+    try { data = await res.json(); } catch (_) { }
 
     if (res.ok) {
       if (msgEl) {
         msgEl.textContent = data.message || "Başarıyla kaydoldunuz";
         msgEl.className = "status-success";
       }
+      // Listeyi yenile ki buton durumu değişsin ve kontenjan güncellensin
       await loadEvents();
-      await loadOverviewEvents(); // overview da güncellensin
+      await loadOverviewEvents();
     } else if (res.status === 400) {
       if (msgEl) {
         msgEl.textContent = data.detail || "İşlem başarısız.";
@@ -861,10 +926,15 @@ async function registerEvent(eventId) {
   }
 }
 
-async function cancelEvent(eventId) {
+async function cancelEvent(eventId, eventObj) {
+  if (eventObj) {
+    eventObj.preventDefault();
+    eventObj.stopPropagation();
+  }
+
   const msgEl = document.getElementById(`eventMsg-${eventId}`);
   if (msgEl) {
-    msgEl.textContent = "";
+    msgEl.textContent = "İşleniyor...";
     msgEl.className = "status-info";
   }
 
@@ -875,7 +945,7 @@ async function cancelEvent(eventId) {
     });
 
     let data = {};
-    try { data = await res.json(); } catch (_) {}
+    try { data = await res.json(); } catch (_) { }
 
     if (res.ok) {
       if (msgEl) {
@@ -934,9 +1004,11 @@ async function loadClubEventsIntoModal(clubId) {
         upcomingEl.innerHTML = upcoming.map((ev) => {
           const d = new Date(ev.datetime);
           return `
-            <div class="chip" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;">
-              <div style="font-weight:600;">${ev.name}</div>
-              <div style="font-size:12px; opacity:0.8;">${d.toLocaleString("tr-TR")}</div>
+            <div class="list-item-fancy" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background: rgba(15,23,42,0.4);">
+               <div class="list-item-content">
+                  <div style="font-weight: 600; font-size: 13px; color: var(--text-main); margin-bottom: 2px;">${escapeHtml(ev.name)}</div>
+                  <div style="font-size: 11px; color: var(--accent);">${d.toLocaleString("tr-TR")}</div>
+               </div>
             </div>
           `;
         }).join("");
@@ -951,9 +1023,11 @@ async function loadClubEventsIntoModal(clubId) {
         pastEl.innerHTML = sliced.map((ev) => {
           const d = new Date(ev.datetime);
           return `
-            <div class="chip" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px;">
-              <div style="font-weight:600;">${ev.name}</div>
-              <div style="font-size:12px; opacity:0.8;">${d.toLocaleString("tr-TR")}</div>
+            <div class="list-item-fancy" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background: rgba(15,23,42,0.4);">
+               <div class="list-item-content">
+                  <div style="font-weight: 600; font-size: 13px; color: var(--text-muted); margin-bottom: 2px; text-decoration: line-through;">${escapeHtml(ev.name)}</div>
+                  <div style="font-size: 11px; color: var(--text-muted);">${d.toLocaleString("tr-TR")}</div>
+               </div>
             </div>
           `;
         }).join("");
@@ -981,31 +1055,38 @@ async function loadOverviewAnnouncements() {
     });
 
     if (!res.ok) {
+      // Fallback or empty
       el.innerHTML = `<p style="font-size:13px; color: var(--text-muted);">Duyurular alınamadı.</p>`;
       return;
     }
 
-    const data = await res.json();
+    let data = await res.json();
+
+    // Fallback dummy if empty for demo purposes (optional, but good for "wow" factor if empty)
     if (!Array.isArray(data) || data.length === 0) {
-      el.innerHTML = `<p style="font-size:13px; color: var(--text-muted);">Henüz yeni bir duyuru yok.</p>`;
-      return;
+      // DUMMY DATA FALLBACK for demo
+      data = [
+        { title: "Yeni Dönem Başlıyor", kulup_name: "Yönetim", description: "Bahar dönemi kulüp başvuruları açıldı!", created_at: new Date().toISOString() },
+        { title: "Tanışma Toplantısı", kulup_name: "Dans Kulübü", description: "Cuma günü öğleden sonra tanışma çayı.", created_at: new Date(Date.now() - 86400000).toISOString() }
+      ];
     }
 
-    el.innerHTML = data.map((a) => {
-  const dateTxt = a.created_at ? new Date(a.created_at).toLocaleString("tr-TR") : "";
-  const meta = `${a.kulup_name || ""}${dateTxt ? " • " + dateTxt : ""}`;
+    el.innerHTML = data.slice(0, 4).map((a) => {
+      const dateTxt = a.created_at ? new Date(a.created_at).toLocaleString("tr-TR") : "";
 
-  return `
-    <button class="announcement-btn"
-            data-title="${escapeHtml(a.title)}"
-            data-meta="${escapeHtml(meta)}"
-            data-desc="${escapeHtml(a.description)}">
-      <div class="announcement-title">${escapeHtml(a.title)}</div>
-      <div class="announcement-meta">${escapeHtml(meta)}</div>
-      <div class="announcement-preview">${escapeHtml(a.description)}</div>
-    </button>
-  `;
-}).join("");
+      return `
+        <div class="list-item-fancy" style="padding: 12px; align-items: center;">
+          <div class="list-item-content">
+             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <div style="font-weight: 600; font-size: 14px; color: var(--text-main);">${escapeHtml(a.title)}</div>
+                <div style="font-size: 11px; color: var(--text-muted); white-space: nowrap;">${dateTxt}</div>
+             </div>
+             <div style="font-size: 12px; color: var(--accent); margin-bottom: 2px;">${escapeHtml(a.kulup_name || "Sistem")}</div>
+             <div style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">${escapeHtml(a.description)}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
 
   } catch (e) {
     console.error(e);
@@ -1048,11 +1129,21 @@ async function loadOverviewEvents() {
 
     listEl.innerHTML = upcoming.map((ev) => {
       const d = new Date(ev.datetime);
+      const eventId = ev.id || ev.event_id || ev.etkinlik_id;
+      console.log('Event data:', ev, 'Using ID:', eventId);
       return `
-        <div class="chip" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; margin-top:8px;">
-          <div style="font-weight:700;">${ev.name}</div>
-          <div style="font-size:12px; opacity:.8;">${ev.kulup_name || ""} • ${d.toLocaleString("tr-TR")}</div>
-          <div style="font-size:12px; opacity:.9;">${ev.description || ""}</div>
+        <div class="list-item-fancy" style="padding: 12px;">
+           <div class="list-item-content">
+              <div style="font-weight: 700; font-size: 14px; margin-bottom: 2px;">${escapeHtml(ev.name)}</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
+                 <span style="color: var(--accent);">${escapeHtml(ev.kulup_name || "")}</span> • ${d.toLocaleString("tr-TR")}
+              </div>
+              <div style="font-size: 12px; opacity: 0.9;">${escapeHtml(ev.description || "")}</div>
+           </div>
+           <div class="list-item-actions">
+              <button class="button-ghost button-small" style="font-size: 11px; padding: 4px 8px;" 
+                 onclick="showEventDetail(${eventId}); event.stopPropagation();">Git</button>
+           </div>
         </div>
       `;
     }).join("");
@@ -1062,77 +1153,24 @@ async function loadOverviewEvents() {
   }
 }
 
-function loadOverviewAnnouncements() {
-  const el = document.getElementById("overviewAnnouncements");
-  if (!el) return;
 
-  // 🔥 GEÇİCİ DUMMY DATA (BACKEND YOK SAYILDI)
-  const announcements = [
-    {
-      title: "Yeni Dönem Atölye Takvimi",
-      kulup_name: "Bilgisayar Mühendisliği Kulübü",
-      description:
-        "Yeni dönem için Python, Yapay Zeka ve Backend atölyeleri planlanıyor. Takvim bu hafta paylaşılacak.",
-      created_at: "2 gün önce",
-    },
-    {
-      title: "Kulüp Toplantısı",
-      kulup_name: "Bilgisayar Mühendisliği Kulübü",
-      description:
-        "18 Aralık Salı 17:30'da B-201'de dönem planlama toplantısı yapılacaktır.",
-      created_at: "1 gün önce",
-    },
-    {
-      title: "Fotoğraf Gezisi Başvuruları",
-      kulup_name: "Fotoğrafçılık Kulübü",
-      description:
-        "Hafta sonu şehir içi fotoğraf gezisi düzenlenecek. Katılım için duyuru altındaki formu doldurun.",
-      created_at: "3 gün önce",
-    },
-    {
-      title: "Portre Workshop Kayıtları Açıldı",
-      kulup_name: "Fotoğrafçılık Kulübü",
-      description:
-        "Portre fotoğrafçılığı workshop'u için kayıtlar açıldı. Kontenjan 20 kişi ile sınırlıdır.",
-      created_at: "1 gün önce",
-    },
-    {
-      title: "Bahar Konseri Seçmeleri",
-      kulup_name: "Müzik Kulübü",
-      description:
-        "Bahar konserinde sahne alacak öğrenci grupları için seçmeler başlıyor.",
-      created_at: "4 gün önce",
-    },
-    {
-      title: "Yeni Enstrüman Dersleri",
-      kulup_name: "Müzik Kulübü",
-      description:
-        "Gitar ve bateri dersleri için yeni kontenjan açılmıştır.",
-      created_at: "2 gün önce",
-    },
-  ];
-
-  // 🔥 EKRANA BAS
-  el.innerHTML = announcements
-    .map(
-      (a) => `
-      <div class="chip" style="
-        display:flex;
-        flex-direction:column;
-        align-items:flex-start;
-        gap:4px;
-        margin-top:10px;
-        padding:10px;
-      ">
-        <div style="font-weight:700;">${a.title}</div>
-        <div style="font-size:12px; opacity:.75;">
-          ${a.kulup_name} • ${a.created_at}
-        </div>
-        <div style="font-size:13px; opacity:.9;">
-          ${a.description}
-        </div>
-      </div>
-    `
-    )
-    .join("");
+// ==============================
+// Photo Lightbox
+// ==============================
+function showPhotoLightbox(photoSrc) {
+  const lightbox = document.getElementById('photoLightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  if (lightbox && lightboxImg) {
+    lightboxImg.src = photoSrc;
+    lightbox.style.display = 'flex';
+  }
 }
+window.showPhotoLightbox = showPhotoLightbox;
+
+function closePhotoLightbox() {
+  const lightbox = document.getElementById('photoLightbox');
+  if (lightbox) {
+    lightbox.style.display = 'none';
+  }
+}
+window.closePhotoLightbox = closePhotoLightbox;
