@@ -387,19 +387,33 @@ if (clubForm) {
 // ÜYELİK LİSTELERİNİ YÜKLEME
 // ----------------------------
 let membersCache = [];
+let memberSearchQuery = "";
 
 function renderMemberTable(filterValue = "all") {
   const allMembersBox = document.getElementById("allMembers");
   if (!allMembersBox) return;
 
+  const q = (memberSearchQuery || "").toLowerCase().trim();
+
+  // filtre + arama
   let filtered = membersCache;
+
   if (filterValue !== "all") {
-    filtered = membersCache.filter((m) => m.status === filterValue);
+    filtered = filtered.filter((m) => m.status === filterValue);
+  }
+
+  if (q) {
+    filtered = filtered.filter((m) => {
+      const fullName = `${m.ad || ""} ${m.soyad || ""}`.toLowerCase();
+      const email = (m.email || "").toLowerCase();
+      const no = String(m.ogrenci_no || "").toLowerCase();
+      return fullName.includes(q) || email.includes(q) || no.includes(q);
+    });
   }
 
   if (filtered.length === 0) {
     allMembersBox.innerHTML =
-      "<p style='color: var(--text-muted); font-size:13px;'>Bu filtreye uygun üye yok.</p>";
+      "<p style='color: var(--text-muted); font-size:13px;'>Bu filtre/arama için üye yok.</p>";
     return;
   }
 
@@ -411,21 +425,25 @@ function renderMemberTable(filterValue = "all") {
 
       return `
         <tr>
-          <td>${m.ogrenci_no}</td>
-          <td>${m.ad} ${m.soyad}</td>
-          <td>${m.email}</td>
           <td>
             <span class="status-badge ${statusClass}">
               ${m.status}
             </span>
           </td>
-          <td>
-            <button
-              class="button-ghost btn-xs btn-danger"
-              onclick="removeMember(${m.uyelik_id})"
-            >
-              Üyeliği Sil
-            </button>
+          <td class="member-name-strong">${m.ad} ${m.soyad}</td>
+          <td class="member-muted">${m.email}</td>
+          <td class="member-muted">${m.ogrenci_no}</td>
+          <td style="text-align:right;">
+            ${
+              m.status === "beklemede"
+                ? `
+                  <button class="button-primary btn-xs" onclick="approve(${m.uyelik_id})">Onayla</button>
+                  <button class="button-ghost btn-xs" onclick="rejectReq(${m.uyelik_id})">Reddet</button>
+                `
+                : `
+                  <button class="button-ghost btn-xs btn-danger" onclick="removeMember(${m.uyelik_id})">Üyeliği Sil</button>
+                `
+            }
           </td>
         </tr>
       `;
@@ -433,14 +451,14 @@ function renderMemberTable(filterValue = "all") {
     .join("");
 
   allMembersBox.innerHTML = `
-    <table class="member-table">
+    <table class="member-table" style="width:100%;">
       <thead>
         <tr>
-          <th>Öğrenci No</th>
+          <th>Durum</th>
           <th>Ad Soyad</th>
           <th>Email</th>
-          <th>Durum</th>
-          <th>İşlem</th>
+          <th>Öğrenci No</th>
+          <th style="text-align:center;">İşlem</th>
         </tr>
       </thead>
       <tbody>
@@ -549,6 +567,15 @@ const filterSelect = document.getElementById("memberFilter");
 if (filterSelect) {
   filterSelect.addEventListener("change", () => {
     const value = filterSelect.value || "all";
+    renderMemberTable(value);
+  });
+}
+
+const memberSearchInput = document.getElementById("memberSearchInput");
+if (memberSearchInput) {
+  memberSearchInput.addEventListener("input", () => {
+    memberSearchQuery = memberSearchInput.value || "";
+    const value = filterSelect ? filterSelect.value || "all" : "all";
     renderMemberTable(value);
   });
 }
