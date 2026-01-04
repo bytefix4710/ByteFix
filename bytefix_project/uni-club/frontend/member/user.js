@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8000";
+﻿const API = "http://127.0.0.1:8000";
 const TOKEN_KEY = "memberToken";
 let MODAL_OPEN = false;
 // Kulüp foto mapping (id -> dosya listesi)
@@ -285,6 +285,16 @@ function showPage(pageName) {
 }
 window.showPage = showPage;
 
+// Helper function to get the currently active page
+function getActivePage() {
+  const activePage = document.querySelector('.page-view.active');
+  if (activePage) {
+    const id = activePage.id; // e.g., "page-events"
+    return id.replace('page-', '');
+  }
+  return null;
+}
+
 // ==============================
 // Profil & Overview
 // ==============================
@@ -475,8 +485,22 @@ async function showClubDetail(clubId) {
     if (descEl) descEl.textContent = club.description || "";
     if (emailEl) emailEl.textContent = club.email || "";
     if (phoneEl) phoneEl.textContent = club.phone || "";
-    if (missionEl) missionEl.textContent = club.mission || "";
-    if (visionEl) visionEl.textContent = club.vision || "";
+
+    // Mission with fallback
+    if (missionEl) {
+      const missionText = club.mission && club.mission.length > 50
+        ? club.mission
+        : "Kulübümüz, öğrencilerin ilgi alanlarında gelişmelerine katkı sağlamak, sosyal ve akademik becerilerini artırmak için çeşitli etkinlikler, atölyeler ve projeler düzenlemektedir. Öğrencilerimizin kendilerini ifade edebilecekleri, yeni arkadaşlıklar kurabileceği ve deneyim kazanabileceği bir ortam sunmayı hedefliyoruz.";
+      missionEl.textContent = missionText;
+    }
+
+    // Vision with fallback
+    if (visionEl) {
+      const visionText = club.vision && club.vision.length > 50
+        ? club.vision
+        : "Üniversitemizin en aktif ve yenilikçi öğrenci topluluklarından biri olmak, ulusal ve uluslararası platformlarda başarılar elde ederek üniversitemizi temsil etmek. Öğrencilerimize kaliteli eğitim ve deneyim fırsatları sunarak, geleceğin lider bireylerini yetiştirmeye katkıda bulunmak.";
+      visionEl.textContent = visionText;
+    }
 
     await loadClubEventsIntoModal(clubId);
 
@@ -555,6 +579,7 @@ async function showClubDetail(clubId) {
 // Kulübe Üye Ol / Geri çek
 // ==============================
 async function joinClub(clubId) {
+  console.log('🔵 joinClub başladı, clubId:', clubId);
   const msgEl = document.getElementById("clubJoinMessage");
   const token = getToken();
   const cancelBtn = document.getElementById("btnCancelMembership");
@@ -571,7 +596,7 @@ async function joinClub(clubId) {
     return;
   }
 
-  const activePage = getActivePage();
+
 
   try {
     const res = await fetch(`${API}/members/clubs/${clubId}/join`, {
@@ -593,6 +618,10 @@ async function joinClub(clubId) {
         joinBtn.textContent = "Başvuru Yapıldı";
         joinBtn.disabled = true;
       }
+
+      // 🔥 FIX: Refresh membership cache without triggering page change
+      await loadMembershipOverview();
+      console.log('✅ joinClub başarılı, cache güncellendi, redirect YOK!');
     } else if (res.status === 400) {
       msgEl.textContent = data.detail || "Bu kulübe zaten başvurunuz bulunuyor.";
       msgEl.className = "status-warning";
@@ -614,9 +643,12 @@ async function joinClub(clubId) {
   } finally {
     if (joinBtn) joinBtn.blur();
   }
+
+
 }
 
 async function cancelMembership(clubId) {
+  console.log('🔴 cancelMembership başladı, clubId:', clubId);
   const msgEl = document.getElementById("clubJoinMessage");
   const cancelBtn = document.getElementById("btnCancelMembership");
   const token = getToken();
@@ -650,6 +682,10 @@ async function cancelMembership(clubId) {
         joinBtn.disabled = false;
         joinBtn.textContent = "Üye Ol";
       }
+
+      // 🔥 FIX: Refresh membership cache without triggering page change
+      await loadMembershipOverview();
+      console.log('✅ cancelMembership başarılı, cache güncellendi, redirect YOK!');
     } else {
       msgEl.textContent = data.detail || "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
       msgEl.className = "status-error";
@@ -659,6 +695,7 @@ async function cancelMembership(clubId) {
     msgEl.textContent = "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
     msgEl.className = "status-error";
   }
+
 }
 
 // ==============================
@@ -705,9 +742,10 @@ async function loadEvents() {
     );
 
     const filterHtml = `
-      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-        <div class="label" style="margin:0;">Kulübe göre filtrele:</div>
-        <select id="eventClubFilter" style="min-width:220px;">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:20px; padding: 16px; background: rgba(15, 23, 42, 0.6); border-radius: 12px; border: 1px solid rgba(148, 163, 184, 0.2);">
+        <span style="font-size: 20px;">🔍</span>
+        <div class="label" style="margin:0; font-weight: 600; color: var(--text-main);">Kulübe göre filtrele:</div>
+        <select id="eventClubFilter" style="min-width:220px; max-width: 300px;">
           <option value="all">Tüm Kulüpler</option>
           ${uniqueClubs.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
         </select>
@@ -738,29 +776,42 @@ async function loadEvents() {
         const evDate = new Date(ev.datetime);
         const isFuture = evDate > now;
 
-        // --- kontenjan / doluluk (fallback'li) ---
-        const capacity =
-          ev.capacity ?? ev.kontenjan ?? null; // backend capacity veya kontenjan dönüyorsa
-        const regCount =
-          ev.registered_count ?? ev.kayit_sayisi ?? ev.register_count ?? null;
+        // --- kontenjan / doluluk (API'den gelen remaining_quota kullan) ---
+        const capacity = ev.capacity ?? null;
+        const remainingQuota = ev.remaining_quota ?? null;
+        const isFull = ev.is_full || false;
 
         const hasCapacity = typeof capacity === "number" && capacity >= 0;
-        const hasRegCount = typeof regCount === "number" && regCount >= 0;
+        const hasRemaining = typeof remainingQuota === "number" && remainingQuota >= 0;
 
-        const isFull = hasCapacity && hasRegCount ? regCount >= capacity : false;
+        // Kontenjan bilgisi HTML
+        let quotaHtml = "";
 
-        let capacityHtml = "";
-        if (hasCapacity && hasRegCount) {
-          capacityHtml = `
-            <div class="club-desc" style="margin-top:6px;">
-              Kontenjan: <b>${regCount} / ${capacity}</b>
-              ${isFull ? `<span class="chip" style="margin-left:8px;">Dolu</span>` : ``}
-            </div>
-          `;
-        } else if (hasCapacity) {
-          capacityHtml = `
-            <div class="club-desc" style="margin-top:6px;">
-              Kontenjan: <b>${capacity}</b>
+        // Sadece gelecek etkinlikler için kontenjan göster
+        if (isFuture) {
+          if (hasCapacity && hasRemaining) {
+            const statusBadge = remainingQuota === 0
+              ? `<span class="badge-outlined danger">Dolu</span>`
+              : `<span class="badge-outlined success">Yer Var</span>`;
+
+            quotaHtml = `
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                 <span class="badge-outlined muted">Kalan: ${remainingQuota} / Toplam: ${capacity}</span>
+                 ${statusBadge}
+              </div>
+            `;
+          } else if (hasCapacity) {
+            quotaHtml = `
+              <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                 <span class="badge-outlined muted">Kontenjan: ${capacity}</span>
+              </div>
+            `;
+          }
+        } else {
+          // Geçmiş etkinlikler için kontenjan gösterme, sadece "sona erdi" etiketi
+          quotaHtml = `
+            <div style="margin-bottom: 10px;">
+              <span class="badge-outlined muted">Etkinlik Sona Erdi</span>
             </div>
           `;
         }
@@ -768,25 +819,24 @@ async function loadEvents() {
         // --- buton mantığı ---
         let actionHtml = "";
         if (isFuture) {
-          if (isFull && !ev.registered) {
-            actionHtml = `<span class="chip">Kontenjan Dolu</span>`;
-          } else if (ev.registered) {
+          if (ev.registered) {
             actionHtml = `
-              <button class="button-ghost button-small"
-                onclick="cancelEvent(${ev.etkinlik_id}); event.stopPropagation();">
-                Başvurunu Geri Çek
-              </button>
-            `;
+              <button type="button" class="button-ghost button-small" 
+                        style="border-color: var(--danger); color: var(--danger);"
+                        onclick="cancelEvent('${ev.etkinlik_id}', event);">
+                        Başvuruyu Geri Çek
+                     </button>`;
+          } else if (isFull || remainingQuota === 0) {
+            actionHtml = `<span class="badge-outlined danger" style="padding: 8px 12px;">Kontenjan Dolu</span>`;
           } else {
             actionHtml = `
-              <button class="button-primary button-small"
-                onclick="registerEvent(${ev.etkinlik_id}); event.stopPropagation();">
-                Kayıt Ol
-              </button>
-            `;
+              <button type="button" class="button-primary button-small" 
+                              onclick="registerEvent('${ev.etkinlik_id}', event);">
+                              Kayıt Ol
+                           </button>`;
           }
         } else {
-          actionHtml = `<span class="chip">Etkinlik Geçmiş</span>`;
+          actionHtml = `<span class="badge-outlined muted">Süresi Doldu</span>`;
         }
 
         html += `
@@ -806,36 +856,17 @@ async function loadEvents() {
                   • ${evDate.toLocaleString("tr-TR")}
                 </div>
             
-                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
-                   ${ev.capacity != null ? `<span class="badge-outlined muted">Kontenjan: ${ev.capacity}</span>` : `<span class="badge-outlined muted">Kontenjan: -</span>`}
-                   ${ev.is_full ? `<span class="badge-outlined danger">Dolu</span>` : `<span class="badge-outlined success">Yer Var</span>`}
-                </div>
+                ${quotaHtml}
 
                 <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5; opacity: 0.9;">
                   ${escapeHtml(ev.description || "")}
                 </div>
 
-                ${capacityHtml}
-
                 <div id="eventMsg-${ev.etkinlik_id}" style="margin-top:8px; font-size:13px; min-height: 20px;"></div>
               </div>
 
               <div class="list-item-actions" style="margin-left: 16px;">
-                ${isFuture ? (
-            ev.registered ?
-              `<button type="button" class="button-ghost button-small" 
-                            style="border-color: var(--danger); color: var(--danger);"
-                            onclick="cancelEvent('${ev.etkinlik_id}', event);">
-                            Başvuruyu Geri Çek
-                         </button>` :
-              (isFull ?
-                `<span class="badge-outlined danger" style="padding: 8px 12px;">Kontenjan Dolu</span>` :
-                `<button type="button" class="button-primary button-small" 
-                                onclick="registerEvent('${ev.etkinlik_id}', event);">
-                                Kayıt Ol
-                             </button>`)
-          ) : `<span class="badge-outlined muted">Süresi Doldu</span>`
-          }
+                ${actionHtml}
               </div>
             </div>
           </div>
@@ -905,7 +936,6 @@ async function registerEvent(eventId, eventObj) {
       }
       // Listeyi yenile ki buton durumu değişsin ve kontenjan güncellensin
       await loadEvents();
-      await loadOverviewEvents();
     } else if (res.status === 400) {
       if (msgEl) {
         msgEl.textContent = data.detail || "İşlem başarısız.";
@@ -952,8 +982,8 @@ async function cancelEvent(eventId, eventObj) {
         msgEl.textContent = data.message || "Başvurunuz geri çekildi.";
         msgEl.className = "status-success";
       }
+      // Listeyi yenile
       await loadEvents();
-      await loadOverviewEvents();
     } else {
       if (msgEl) {
         msgEl.textContent = data.detail || "Geri çekme sırasında hata oluştu.";

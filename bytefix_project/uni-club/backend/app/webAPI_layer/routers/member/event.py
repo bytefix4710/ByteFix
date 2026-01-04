@@ -59,8 +59,10 @@ def list_events_for_member(
         )
 
         is_full = False
+        remaining_quota = None
         if capacity is not None:
             is_full = approved_count >= capacity
+            remaining_quota = max(0, capacity - approved_count)
 
         result.append({
             "etkinlik_id": ev.etkinlik_id,
@@ -71,6 +73,7 @@ def list_events_for_member(
             "description": ev.description,
             "image_url": ev.image_url,
             "capacity": capacity,
+            "remaining_quota": remaining_quota,
             "registered": True if reg else False,
             "reg_status": reg.status if reg else None,
             "is_full": is_full,
