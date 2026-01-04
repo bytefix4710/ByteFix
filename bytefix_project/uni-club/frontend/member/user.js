@@ -1,6 +1,47 @@
 ﻿const API = "http://127.0.0.1:8000";
 const TOKEN_KEY = "memberToken";
 let MODAL_OPEN = false;
+
+// 🔥 PAGE LOCK: Prevents unwanted navigation to overview after actions
+// Using localStorage to persist lock across page reloads
+const PAGE_LOCK_KEY = "__page_lock__";
+const PAGE_LOCK_UNTIL_KEY = "__page_lock_until__";
+const LOCKED_PAGE_KEY = "__locked_page__";
+
+function setPageLock(pageName, durationMs = 1000) {
+  localStorage.setItem(PAGE_LOCK_KEY, "true");
+  localStorage.setItem(PAGE_LOCK_UNTIL_KEY, String(Date.now() + durationMs));
+  localStorage.setItem(LOCKED_PAGE_KEY, pageName);
+  console.log(`🔒 PAGE LOCK aktif: ${pageName} sayfası ${durationMs}ms süreyle kilitlendi`);
+}
+
+function clearPageLock() {
+  localStorage.removeItem(PAGE_LOCK_KEY);
+  localStorage.removeItem(PAGE_LOCK_UNTIL_KEY);
+  localStorage.removeItem(LOCKED_PAGE_KEY);
+  console.log('🔓 PAGE LOCK kaldırıldı');
+}
+
+function isPageLocked() {
+  const lock = localStorage.getItem(PAGE_LOCK_KEY);
+  const until = localStorage.getItem(PAGE_LOCK_UNTIL_KEY);
+
+  if (!lock || !until) return false;
+
+  const now = Date.now();
+  const lockUntil = parseInt(until, 10);
+
+  if (now >= lockUntil) {
+    clearPageLock();
+    return false;
+  }
+
+  return true;
+}
+
+function getLockedPage() {
+  return localStorage.getItem(LOCKED_PAGE_KEY);
+}
 // Kulüp foto mapping (id -> dosya listesi)
 // Dosyalar: frontend/assets/clubs/
 const CLUB_PHOTOS = {
@@ -42,6 +83,38 @@ function getActivePage() {
   if (!active || !active.id) return "overview";
   return active.id.replace("page-", "");
 }
+
+// ==============================
+// Centralized Event Permission Check
+// ==============================
+/**
+ * Check if user can register to an event based on club membership status
+ * @param {number} clubId - The club ID for the event
+ * @returns {Object} { canRegister: boolean, status: 'approved'|'pending'|'none', message: string }
+ */
+function canRegisterToEvent(clubId) {
+  if (!membershipOverview || !clubId) {
+    return { canRegister: false, status: 'none', message: 'Üye Değilsiniz' };
+  }
+
+  const approved = membershipOverview.approved || [];
+  const pending = membershipOverview.pending || [];
+
+  const isApproved = approved.some(c => c.club_id === Number(clubId));
+  const isPending = pending.some(c => c.club_id === Number(clubId));
+
+  if (isApproved) {
+    return { canRegister: true, status: 'approved', message: '' };
+  } else if (isPending) {
+    return { canRegister: false, status: 'pending', message: 'Üyelik Onay Bekliyor' };
+  } else {
+    return { canRegister: false, status: 'none', message: 'Üye Değilsiniz' };
+  }
+}
+
+// Expose to window for use in event_overlay.js
+window.canRegisterToEvent = canRegisterToEvent;
+
 
 // ==============================
 // DOMContentLoaded
@@ -146,11 +219,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // ------- DASHBOARD INIT -------
   if (document.getElementById("page-overview")) {
     console.log("✅ Dashboard yüklendi.");
-    // Force UI state sync
-    const startPage = getActivePage() || "overview";
-    if (typeof showPage === "function") {
-      showPage(startPage);
-    }
+
+    // Load initial data for overview page (which is active by default in HTML)
+    loadProfile();
+    loadMembershipOverview();
+    loadOverviewAnnouncements();
+    loadOverviewEvents();
   }
 
   // ------- GLOBAL CLICK HANDLER (Kulüp listesi) -------
@@ -239,6 +313,19 @@ function showPage(pageName) {
     console.log("⛔ Modal açıkken routing iptal edildi");
     return;
   }
+
+  // 🔥 PAGE LOCK: Block navigation to overview during actions
+  if (isPageLocked()) {
+    const lockedPage = getLockedPage();
+    if (pageName === 'overview' && lockedPage && lockedPage !== 'overview') {
+      console.log(`⛔ PAGE LOCK aktif: overview'a geçiş engellendi, ${lockedPage} sayfasında kalınıyor`);
+      return;
+    }
+  }
+
+  // DEBUG: Trace showPage calls
+  console.log("[showPage]", pageName, "active:", typeof getActivePage === 'function' ? getActivePage() : 'N/A');
+  console.log(new Error("showPage stack").stack);
 
   // 1. Hide all pages
   document.querySelectorAll(".page-view").forEach((view) => {
@@ -359,6 +446,7 @@ async function loadMembershipOverview() {
 
     const data = await res.json();
     membershipOverview = data;
+    window.membershipOverview = data; // Make it globally accessible
     updateOverviewUI(data);
   } catch (e) {
     console.error("Üyelik overview hatası:", e);
@@ -580,6 +668,11 @@ async function showClubDetail(clubId) {
 // ==============================
 async function joinClub(clubId) {
   console.log('🔵 joinClub başladı, clubId:', clubId);
+
+  // Save current page before action
+  const currentPage = getActivePage();
+  setPageLock(currentPage, 1000);
+
   const msgEl = document.getElementById("clubJoinMessage");
   const token = getToken();
   const cancelBtn = document.getElementById("btnCancelMembership");
@@ -596,8 +689,6 @@ async function joinClub(clubId) {
     return;
   }
 
-
-
   try {
     const res = await fetch(`${API}/members/clubs/${clubId}/join`, {
       method: "POST",
@@ -612,16 +703,44 @@ async function joinClub(clubId) {
     if (res.ok) {
       msgEl.textContent = data.message || "Üyelik başvurunuz alındı.";
       msgEl.className = "status-success";
+      showToast(data.message || "Başvurunuz başarıyla alındı.", "success");
 
-      if (cancelBtn) cancelBtn.style.display = "inline-flex";
-      if (joinBtn) {
-        joinBtn.textContent = "Başvuru Yapıldı";
-        joinBtn.disabled = true;
+      // Refresh membership cache and update modal state
+      await loadMembershipOverview();
+
+      // Update button states based on new membership status
+      const clubIdNum = Number(clubId);
+      if (membershipOverview) {
+        const approved = membershipOverview.approved || [];
+        const pending = membershipOverview.pending || [];
+
+        const isApproved = approved.some(c => c.club_id === clubIdNum);
+        const isPending = pending.some(c => c.club_id === clubIdNum);
+
+        if (isApproved) {
+          if (joinBtn) {
+            joinBtn.disabled = true;
+            joinBtn.textContent = "Bu kulübün üyesisiniz";
+          }
+          if (cancelBtn) cancelBtn.style.display = "none";
+        } else if (isPending) {
+          if (joinBtn) {
+            joinBtn.textContent = "Başvuru Yapıldı";
+            joinBtn.disabled = true;
+          }
+          if (cancelBtn) cancelBtn.style.display = "inline-flex";
+        }
       }
 
-      // 🔥 FIX: Refresh membership cache without triggering page change
-      await loadMembershipOverview();
-      console.log('✅ joinClub başarılı, cache güncellendi, redirect YOK!');
+      // Restore page if it changed
+      setTimeout(() => {
+        const newPage = getActivePage();
+        if (newPage !== currentPage && currentPage) {
+          showPage(currentPage);
+        }
+      }, 100);
+
+      console.log('✅ joinClub başarılı, modal state güncellendi');
     } else if (res.status === 400) {
       msgEl.textContent = data.detail || "Bu kulübe zaten başvurunuz bulunuyor.";
       msgEl.className = "status-warning";
@@ -643,12 +762,15 @@ async function joinClub(clubId) {
   } finally {
     if (joinBtn) joinBtn.blur();
   }
-
-
 }
 
 async function cancelMembership(clubId) {
   console.log('🔴 cancelMembership başladı, clubId:', clubId);
+
+  // Save current page before action
+  const currentPage = getActivePage();
+  setPageLock(currentPage, 1000);
+
   const msgEl = document.getElementById("clubJoinMessage");
   const cancelBtn = document.getElementById("btnCancelMembership");
   const token = getToken();
@@ -675,7 +797,12 @@ async function cancelMembership(clubId) {
     if (res.ok) {
       msgEl.textContent = data.message || "Başvuru geri çekildi.";
       msgEl.className = "status-success";
+      showToast(data.message || "Başvurunuz başarıyla geri çekildi.", "success");
 
+      // Refresh membership cache and update modal state
+      await loadMembershipOverview();
+
+      // Reset button states
       if (cancelBtn) cancelBtn.style.display = "none";
       const joinBtn = document.getElementById("btnJoinClub");
       if (joinBtn) {
@@ -683,9 +810,15 @@ async function cancelMembership(clubId) {
         joinBtn.textContent = "Üye Ol";
       }
 
-      // 🔥 FIX: Refresh membership cache without triggering page change
-      await loadMembershipOverview();
-      console.log('✅ cancelMembership başarılı, cache güncellendi, redirect YOK!');
+      // Restore page if it changed
+      setTimeout(() => {
+        const newPage = getActivePage();
+        if (newPage !== currentPage && currentPage) {
+          showPage(currentPage);
+        }
+      }, 100);
+
+      console.log('✅ cancelMembership başarılı, modal state güncellendi');
     } else {
       msgEl.textContent = data.detail || "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
       msgEl.className = "status-error";
@@ -695,7 +828,6 @@ async function cancelMembership(clubId) {
     msgEl.textContent = "Başvuruyu geri çekerken bir hata oluştu, lütfen tekrar deneyin.";
     msgEl.className = "status-error";
   }
-
 }
 
 // ==============================
@@ -817,21 +949,33 @@ async function loadEvents() {
         }
 
         // --- buton mantığı ---
+        // Use centralized permission check
+        const clubId = ev.kulup_id || ev.club_id;
+        const permission = canRegisterToEvent(clubId);
+
         let actionHtml = "";
         if (isFuture) {
           if (ev.registered) {
-            actionHtml = `
-              <button type="button" class="button-ghost button-small" 
+            // Only allow cancellation if user is approved member
+            if (permission.canRegister) {
+              actionHtml = `
+              <button type="button" class="button-ghost button-small event-cancel-btn" 
                         style="border-color: var(--danger); color: var(--danger);"
-                        onclick="cancelEvent('${ev.etkinlik_id}', event);">
+                        data-event-id="${ev.etkinlik_id}">
                         Başvuruyu Geri Çek
                      </button>`;
+            } else {
+              actionHtml = `<span class="badge-outlined muted" style="padding: 8px 12px;">${permission.message}</span>`;
+            }
           } else if (isFull || remainingQuota === 0) {
             actionHtml = `<span class="badge-outlined danger" style="padding: 8px 12px;">Kontenjan Dolu</span>`;
+          } else if (!permission.canRegister) {
+            // User is pending or not a member - show consistent message
+            actionHtml = `<span class="badge-outlined warning" style="padding: 8px 12px;">${permission.message}</span>`;
           } else {
             actionHtml = `
-              <button type="button" class="button-primary button-small" 
-                              onclick="registerEvent('${ev.etkinlik_id}', event);">
+              <button type="button" class="button-primary button-small event-register-btn" 
+                              data-event-id="${ev.etkinlik_id}">
                               Kayıt Ol
                            </button>`;
           }
@@ -880,6 +1024,26 @@ async function loadEvents() {
     // ilk render
     renderEvents(sortedEvents);
 
+    // Event delegation for register/cancel buttons
+    if (inner) {
+      inner.addEventListener('click', async (e) => {
+        const registerBtn = e.target.closest('.event-register-btn');
+        const cancelBtn = e.target.closest('.event-cancel-btn');
+
+        if (registerBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const eventId = registerBtn.getAttribute('data-event-id');
+          if (eventId) await registerEvent(eventId, e);
+        } else if (cancelBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const eventId = cancelBtn.getAttribute('data-event-id');
+          if (eventId) await cancelEvent(eventId, e);
+        }
+      });
+    }
+
     // filtre change
     if (filterEl) {
       filterEl.addEventListener("change", () => {
@@ -914,10 +1078,43 @@ async function registerEvent(eventId, eventObj) {
     eventObj.stopPropagation();
   }
 
+  // 🔥 PAGE LOCK: Lock current page to prevent overview navigation
+  const currentPage = getActivePage();
+  setPageLock(currentPage, 1000);
+
   const msgEl = document.getElementById(`eventMsg-${eventId}`);
   if (msgEl) {
     msgEl.textContent = "İşleniyor...";
     msgEl.className = "status-info";
+  }
+
+  // Check membership before attempting registration
+  try {
+    const evRes = await fetch(`${API}/members/events`, {
+      headers: { ...authHeader(), "Content-Type": "application/json" },
+    });
+    if (evRes.ok) {
+      const events = await evRes.json();
+      const event = events.find(e => (e.id || e.event_id || e.etkinlik_id) == eventId);
+
+      if (event) {
+        const clubId = event.kulup_id || event.club_id;
+        if (membershipOverview && clubId) {
+          const approved = membershipOverview.approved || [];
+          const isMember = approved.some(c => c.club_id === Number(clubId));
+
+          if (!isMember) {
+            if (msgEl) {
+              msgEl.textContent = `Bu etkinliğe katılmak için önce ${event.kulup_name || 'bu kulüp'} kulübüne üye olmalısın.`;
+              msgEl.className = "status-error";
+            }
+            return;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Membership check error:', e);
   }
 
   try {
@@ -934,8 +1131,21 @@ async function registerEvent(eventId, eventObj) {
         msgEl.textContent = data.message || "Başarıyla kaydoldunuz";
         msgEl.className = "status-success";
       }
-      // Listeyi yenile ki buton durumu değişsin ve kontenjan güncellensin
-      await loadEvents();
+      showToast(data.message || "Etkinliğe kaydınız alındı.", "success");
+
+      // Update UI locally instead of reloading entire list
+      const registerBtn = document.querySelector(`.event-register-btn[data-event-id="${eventId}"]`);
+      if (registerBtn) {
+        const actionsContainer = registerBtn.closest('.list-item-actions');
+        if (actionsContainer) {
+          actionsContainer.innerHTML = `
+            <button type="button" class="button-ghost button-small event-cancel-btn" 
+                    style="border-color: var(--danger); color: var(--danger);"
+                    data-event-id="${eventId}">
+                    Başvuruyu Geri Çek
+            </button>`;
+        }
+      }
     } else if (res.status === 400) {
       if (msgEl) {
         msgEl.textContent = data.detail || "İşlem başarısız.";
@@ -962,10 +1172,43 @@ async function cancelEvent(eventId, eventObj) {
     eventObj.stopPropagation();
   }
 
+  // 🔥 PAGE LOCK: Lock current page to prevent overview navigation
+  const currentPage = getActivePage();
+  setPageLock(currentPage, 1000);
+
   const msgEl = document.getElementById(`eventMsg-${eventId}`);
   if (msgEl) {
     msgEl.textContent = "İşleniyor...";
     msgEl.className = "status-info";
+  }
+
+  // Check membership before attempting cancellation
+  try {
+    const evRes = await fetch(`${API}/members/events`, {
+      headers: { ...authHeader(), "Content-Type": "application/json" },
+    });
+    if (evRes.ok) {
+      const events = await evRes.json();
+      const event = events.find(e => (e.id || e.event_id || e.etkinlik_id) == eventId);
+
+      if (event) {
+        const clubId = event.kulup_id || event.club_id;
+        if (membershipOverview && clubId) {
+          const approved = membershipOverview.approved || [];
+          const isMember = approved.some(c => c.club_id === Number(clubId));
+
+          if (!isMember) {
+            if (msgEl) {
+              msgEl.textContent = `Bu etkinliğe katılmak için önce ${event.kulup_name || 'bu kulüp'} kulübüne üye olmalısın.`;
+              msgEl.className = "status-error";
+            }
+            return;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Membership check error:', e);
   }
 
   try {
@@ -979,11 +1222,23 @@ async function cancelEvent(eventId, eventObj) {
 
     if (res.ok) {
       if (msgEl) {
-        msgEl.textContent = data.message || "Başvurunuz geri çekildi.";
+        msgEl.textContent = data.message || "Başvurunuz geri çekildi";
         msgEl.className = "status-success";
       }
-      // Listeyi yenile
-      await loadEvents();
+      showToast(data.message || "Etkinlik başvurunuz geri çekildi.", "success");
+
+      // Update UI locally instead of reloading entire list
+      const cancelBtn = document.querySelector(`.event-cancel-btn[data-event-id="${eventId}"]`);
+      if (cancelBtn) {
+        const actionsContainer = cancelBtn.closest('.list-item-actions');
+        if (actionsContainer) {
+          actionsContainer.innerHTML = `
+            <button type="button" class="button-primary button-small event-register-btn" 
+                    data-event-id="${eventId}">
+                    Kayıt Ol
+            </button>`;
+        }
+      }
     } else {
       if (msgEl) {
         msgEl.textContent = data.detail || "Geri çekme sırasında hata oluştu.";
@@ -1204,3 +1459,60 @@ function closePhotoLightbox() {
   }
 }
 window.closePhotoLightbox = closePhotoLightbox;
+
+// ==============================
+// Toast Notification System with SessionStorage Persistence
+// ==============================
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  // Save to sessionStorage for persistence across redirects
+  sessionStorage.setItem('pendingToast', JSON.stringify({
+    message,
+    type,
+    timestamp: Date.now()
+  }));
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠';
+
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div class="toast-message">${message}</div>
+  `;
+
+  container.appendChild(toast);
+
+  // Auto remove after 5 seconds (minimum)
+  setTimeout(() => {
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+window.showToast = showToast;
+
+// Check for pending toast on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const pendingToast = sessionStorage.getItem('pendingToast');
+  if (pendingToast) {
+    try {
+      const { message, type, timestamp } = JSON.parse(pendingToast);
+      // Show toast if it was created within the last 5 seconds
+      if (Date.now() - timestamp < 5000) {
+        setTimeout(() => {
+          showToast(message, type);
+        }, 100);
+      }
+      // Clear the pending toast
+      sessionStorage.removeItem('pendingToast');
+    } catch (e) {
+      console.error('Failed to restore toast:', e);
+      sessionStorage.removeItem('pendingToast');
+    }
+  }
+});
+

@@ -799,15 +799,24 @@ select option {
 .modal-card {
   position: relative;
   width: min(900px, 95vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
   background: radial-gradient(circle at top left,
       rgba(30, 64, 175, 0.18),
       transparent 55%),
     #020617;
   border-radius: 18px;
-  padding: 22px 24px 20px;
+  padding: 0;
   box-shadow: 0 24px 55px rgba(15, 23, 42, 0.95),
     0 0 0 1px rgba(148, 163, 184, 0.4);
   border: 1px solid rgba(148, 163, 184, 0.35);
+  overflow: hidden;
+}
+
+.modal-card .card-header {
+  flex-shrink: 0;
+  padding: 22px 24px 16px;
 }
 
 body.modal-open .dashboard-layout {
@@ -831,6 +840,7 @@ body.modal-open #clubDetailModal {
   font-size: 20px;
   cursor: pointer;
   transition: color 0.15s ease, transform 0.15s ease;
+  z-index: 10;
 }
 
 .modal-close:hover {
@@ -840,18 +850,44 @@ body.modal-open #clubDetailModal {
 
 /* İç layout: solda yazılar, sağda fotoğraflar */
 .modal-body {
-  margin-top: 10px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 24px 20px;
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.8fr);
+  gap: 16px;
+}
+
+/* Scrollbar styling for modal body */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.7);
 }
 
 @media (max-width: 900px) {
   .modal-card {
+    max-height: 95vh;
+  }
+
+  .modal-card .card-header {
     padding: 18px;
   }
 
   .modal-body {
+    padding: 10px 18px 18px;
     grid-template-columns: 1fr;
   }
 }
@@ -924,6 +960,55 @@ body.modal-open #clubDetailModal {
 .dashboard-content>section>.card {
   width: 100%;
   max-width: 100%;
+}
+
+/* ===== RESPONSIVE LAYOUT FOR 15.6" SCREENS ===== */
+.page-root {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (max-width: 1400px) {
+  .page-root {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .app-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .dashboard-content {
+    padding: 20px;
+  }
+
+  .card-fancy {
+    padding: 18px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .page-root {
+    padding: 0 12px;
+  }
+
+  .dashboard-layout {
+    gap: 16px;
+  }
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .dashboard-content {
+    padding: 16px;
+  }
+
+  .card-fancy {
+    padding: 16px !important;
+  }
 }
 
 /* Genel bakış, kulüpler, etkinlikler, profil sayfalarında
@@ -1890,4 +1975,164 @@ body.modal-open #clubDetailModal {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* ==============================
+   Toast Notifications
+   ============================== */
+.toast-container {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px 18px;
+  min-width: 280px;
+  max-width: 400px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  pointer-events: all;
+  animation: toastSlideIn 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast.toast-success {
+  border-left: 4px solid var(--success);
+  color: var(--success);
+}
+
+.toast.toast-error {
+  border-left: 4px solid var(--danger);
+  color: var(--danger);
+}
+
+.toast.toast-warning {
+  border-left: 4px solid #f59e0b;
+  color: #fbbf24;
+}
+
+.toast-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  color: var(--text-main);
+}
+
+.toast.toast-exit {
+  animation: toastSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes toastSlideOut {
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+/* ==============================
+   Event Detail Overlay (Fixed Positioning)
+   ============================== */
+.event-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.event-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: -1;
+}
+
+.event-detail-card {
+  position: relative;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  max-width: 600px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.3s ease-out;
+  z-index: 1;
+}
+
+.event-detail-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.event-detail-close:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+.event-detail-header {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.event-detail-body {
+  padding: 24px;
+}
+
+.event-detail-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Body scroll lock when overlay is open */
+body.overlay-open {
+  overflow: hidden;
 }
