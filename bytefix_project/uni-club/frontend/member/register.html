@@ -1,76 +1,76 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="utf-8" />
-    <title>Üye Kayıt | UniClub</title>
-    <link rel="stylesheet" href="../styles.css" />
-  </head>
-  <body>
-    <div class="page-root">
-      <div class="app-shell auth-layout">
-        <header class="app-header" style="margin-bottom: 14px">
-          <div class="app-title-block">
-            <div class="app-title">
-              UniClub <span class="app-title-badge">Üye</span>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Üye Kayıt | UniClub</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body>
+  <div class="page-root" style="padding: 0 !important; max-width: 100% !important;">
+    <div class="app-shell auth-layout"
+      style="max-width: 100% !important; width: 100% !important; height: 100vh !important; border-radius: 0 !important; border: none !important;">
+      <header class="app-header" style="margin-bottom: 14px">
+        <div class="app-title-block">
+          <div class="app-title">
+            UniClub <span class="app-title-badge">Üye</span>
+          </div>
+          <div class="app-subtitle">Etkinliklerden haberdar olmak için hesap oluştur.</div>
+        </div>
+        <nav class="app-nav">
+          <a href="../index.html" class="button-ghost">Ana Sayfa</a>
+        </nav>
+      </header>
+
+      <main>
+        <h2 class="auth-title">Üye Kaydı</h2>
+        <p class="auth-subtitle">Öğrenci bilgilerinle hızlıca aramıza katıl.</p>
+
+        <div class="card">
+          <form onsubmit="return false;">
+            <label>
+              <span class="label">Öğrenci Numarası</span>
+              <input type="text" id="regOgrenciNo" placeholder="2023001" required />
+            </label>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <label>
+                <span class="label">Ad</span>
+                <input type="text" id="regName" placeholder="Adın" required />
+              </label>
+              <label>
+                <span class="label">Soyad</span>
+                <input type="text" id="regSurname" placeholder="Soyadın" required />
+              </label>
             </div>
-            <div class="app-subtitle">Etkinliklerden haberdar olmak için hesap oluştur.</div>
-          </div>
-          <nav class="app-nav">
-            <a href="../index.html" class="button-ghost">Ana Sayfa</a>
-          </nav>
-        </header>
 
-        <main>
-          <h2 class="auth-title">Üye Kaydı</h2>
-          <p class="auth-subtitle">Öğrenci bilgilerinle hızlıca aramıza katıl.</p>
+            <label>
+              <span class="label">E-posta</span>
+              <input type="email" id="regEmail" placeholder="ogrenci@univ.edu.tr" required />
+            </label>
 
-          <div class="card">
-            <form onsubmit="return false;"> 
-              <label>
-                <span class="label">Öğrenci Numarası</span>
-                <input type="text" id="regOgrenciNo" placeholder="2023001" required />
-              </label>
+            <label>
+              <span class="label">Şifre</span>
+              <input type="password" id="regPassword" placeholder="En az 6 karakter" required />
+            </label>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <label>
-                    <span class="label">Ad</span>
-                    <input type="text" id="regName" placeholder="Adın" required />
-                </label>
-                <label>
-                    <span class="label">Soyad</span>
-                    <input type="text" id="regSurname" placeholder="Soyadın" required />
-                </label>
-              </div>
+            <button type="button" id="btnRegister" class="button-primary"
+              style="justify-content: center; margin-top: 4px; width: 100%;">
+              Kayıt Ol
+            </button>
+            <p id="msg" class="status-error" style="margin-top: 10px; text-align:center;"></p>
+          </form>
+        </div>
 
-              <label>
-                <span class="label">E-posta</span>
-                <input type="email" id="regEmail" placeholder="ogrenci@univ.edu.tr" required />
-              </label>
-
-              <label>
-                <span class="label">Şifre</span>
-                <input type="password" id="regPassword" placeholder="En az 6 karakter" required />
-              </label>
-
-              <button
-                type="button" 
-                id="btnRegister"
-                class="button-primary"
-                style="justify-content: center; margin-top: 4px; width: 100%;"
-              >
-                Kayıt Ol
-              </button>
-              <p id="msg" class="status-error" style="margin-top: 10px; text-align:center;"></p>
-            </form>
-          </div>
-
-          <p class="auth-footer">
-            Zaten hesabın var mı? <a href="login.html">Giriş yap</a>
-          </p>
-        </main>
-      </div>
+        <p class="auth-footer">
+          Zaten hesabın var mı? <a href="login.html">Giriş yap</a>
+        </p>
+      </main>
     </div>
+  </div>
 
-    <script src="user.js"></script>
-  </body>
+  <script src="user.js"></script>
+</body>
+
 </html>

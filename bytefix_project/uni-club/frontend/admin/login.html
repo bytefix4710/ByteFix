@@ -1,75 +1,65 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="utf-8" />
-    <title>Kulüp Yöneticisi Giriş</title>
-    <link rel="stylesheet" href="../styles.css" />
-  </head>
-  <body>
-    <div class="page-root">
-      <div class="app-shell auth-layout">
-        <header class="app-header" style="margin-bottom: 14px">
-          <div class="app-title-block">
-            <div class="app-title">
-              UniClub
-              <span class="app-title-badge">Admin</span>
-            </div>
-            <div class="app-subtitle">
-              Kulübünün kontrol paneline giriş yap.
-            </div>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Kulüp Yöneticisi Giriş</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body>
+  <div class="page-root" style="padding: 0 !important; max-width: 100% !important;">
+    <div class="app-shell auth-layout"
+      style="max-width: 100% !important; width: 100% !important; height: 100vh !important; border-radius: 0 !important; border: none !important;">
+      <header class="app-header" style="margin-bottom: 14px">
+        <div class="app-title-block">
+          <div class="app-title">
+            UniClub
+            <span class="app-title-badge">Admin</span>
           </div>
-          <nav class="app-nav">
-            <a href="../index.html" class="button-ghost">Ana Sayfa</a>
-          </nav>
-        </header>
-
-        <main>
-          <h2 class="auth-title">Kulüp Yöneticisi Girişi</h2>
-          <p class="auth-subtitle">
-            Kayıt olurken kullandığın e-posta ve şifreyi girerek devam et.
-          </p>
-
-          <div class="card">
-            <form id="loginForm">
-              <label>
-                <span class="label">E-posta</span>
-                <input
-                  type="email"
-                  id="email"
-                  placeholder="admin@uniclub.test"
-                  required
-                />
-              </label>
-
-              <label>
-                <span class="label">Şifre</span>
-                <input
-                  type="password"
-                  id="password"
-                  placeholder="••••••••"
-                  required
-                />
-              </label>
-
-              <button
-                type="submit"
-                class="button-primary"
-                style="justify-content: center; margin-top: 4px; width: 100%"
-              >
-                Giriş Yap
-              </button>
-              <p id="msg" class="status-error"></p>
-            </form>
+          <div class="app-subtitle">
+            Kulübünün kontrol paneline giriş yap.
           </div>
+        </div>
+        <nav class="app-nav">
+          <a href="../index.html" class="button-ghost">Ana Sayfa</a>
+        </nav>
+      </header>
 
-          <p class="auth-footer">
-            Henüz hesabın yok mu?
-            <a href="register.html">Kulüp yöneticisi olarak kayıt ol</a>
-          </p>
-        </main>
-      </div>
+      <main>
+        <h2 class="auth-title">Kulüp Yöneticisi Girişi</h2>
+        <p class="auth-subtitle">
+          Kayıt olurken kullandığın e-posta ve şifreyi girerek devam et.
+        </p>
+
+        <div class="card">
+          <form id="loginForm">
+            <label>
+              <span class="label">E-posta</span>
+              <input type="email" id="email" placeholder="admin@uniclub.test" required />
+            </label>
+
+            <label>
+              <span class="label">Şifre</span>
+              <input type="password" id="password" placeholder="••••••••" required />
+            </label>
+
+            <button type="submit" class="button-primary" style="justify-content: center; margin-top: 4px; width: 100%">
+              Giriş Yap
+            </button>
+            <p id="msg" class="status-error"></p>
+          </form>
+        </div>
+
+        <p class="auth-footer">
+          Henüz hesabın yok mu?
+          <a href="register.html">Kulüp yöneticisi olarak kayıt ol</a>
+        </p>
+      </main>
     </div>
+  </div>
 
-    <script src="admin.js"></script>
-  </body>
+  <script src="admin.js"></script>
+</body>
+
 </html>

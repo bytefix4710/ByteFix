@@ -37,22 +37,27 @@ body {
 
 .page-root {
   min-height: 100vh;
+  max-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .app-shell {
   width: 100%;
-  max-width: 1200px;
-  /* Genişliği artırdım */
+  max-width: 100%;
+  height: 100vh;
   background: rgba(15, 23, 42, 0.92);
-  border-radius: 24px;
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
   backdrop-filter: blur(22px);
-  padding: 30px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ---------- Header / Navbar ---------- */
@@ -61,8 +66,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 30px;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .app-title-block {
@@ -454,13 +460,39 @@ select option {
 
 .dashboard-layout {
   display: flex;
-  min-height: calc(100vh - 120px);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .dashboard-content {
   flex: 1;
-  padding: 24px;
+  padding: 20px;
   overflow-y: auto;
+  max-height: 100%;
+}
+
+/* Custom scrollbar styling - subtle and only visible on hover */
+.dashboard-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.dashboard-content:hover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
 }
 
 .page-view {
@@ -966,18 +998,21 @@ body.modal-open #clubDetailModal {
 .page-root {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 20px;
 }
 
-@media (max-width: 1400px) {
+.app-shell {
+  max-width: 1200px;
+}
+
+@media (max-width: 1536px) {
   .page-root {
-    max-width: 100%;
-    padding: 0 16px;
+    padding: 16px;
   }
 
   .app-shell {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 1150px;
+    padding: 24px;
   }
 
   .dashboard-content {
@@ -989,13 +1024,18 @@ body.modal-open #clubDetailModal {
   }
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
   .page-root {
-    padding: 0 12px;
+    padding: 12px;
+  }
+
+  .app-shell {
+    max-width: 100%;
+    padding: 20px;
   }
 
   .dashboard-layout {
-    gap: 16px;
+    gap: 12px;
   }
 
   .sidebar {
@@ -1003,11 +1043,52 @@ body.modal-open #clubDetailModal {
   }
 
   .dashboard-content {
-    padding: 16px;
+    padding: 20px;
   }
 
   .card-fancy {
     padding: 16px !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  .page-root {
+    padding: 8px;
+  }
+
+  .app-shell {
+    padding: 16px;
+  }
+
+  .sidebar {
+    width: 180px;
+  }
+
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  .card-fancy {
+    padding: 14px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  .sidebar-item {
+    white-space: nowrap;
   }
 }
 
@@ -1286,21 +1367,59 @@ body.modal-open #clubDetailModal {
 }
 
 .announcements-list {
-  max-height: 320px;
-  /* burayı arttır/azalt */
+  max-height: 280px;
   overflow-y: auto;
   padding-right: 6px;
-  /* scroll bar içeride kalsın */
 }
 
-/* scroll bar biraz daha estetik olsun (opsiyonel) */
 .announcements-list::-webkit-scrollbar {
   width: 6px;
 }
 
+.announcements-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .announcements-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.announcements-list:hover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.announcements-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+/* Events list max height */
+.events-grid {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.events-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.events-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.events-grid::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.events-grid:hover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.events-grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
 }
 
 /* ===== SuperAdmin-like Card Blocks (Club Admin UI) ===== */
@@ -1640,6 +1759,7 @@ body.modal-open #clubDetailModal {
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
+  padding: 16px;
 }
 
 .card-fancy:hover {
@@ -1778,109 +1898,7 @@ body.modal-open #clubDetailModal {
   align-items: flex-end;
 }
 
-   
-/* ===========================
-   EVENT DETAIL OVERLAY
-   =========================== */
-
-.event-detail-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.event-detail-backdrop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.event-detail-card {
-  position: relative;
-  z-index: 10000;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  max-width: 650px;
-  width: 90%;
-  max-height: 85vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1);
-  animation: eventDetailSlideIn 0.3s ease-out;
-}
-
-@keyframes eventDetailSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.event-detail-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--danger);
-  font-size: 28px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  line-height: 1;
-  padding: 0;
-}
-
-.event-detail-close:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: var(--danger);
-  transform: rotate(90deg);
-}
-
-.event-detail-header {
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-}
-
-.event-detail-body {
-  color: var(--text-main);
-}
-
-.event-detail-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.event-detail-actions .button-primary,
-.event-detail-actions .button-ghost {
-  flex: 1;
-  min-width: 140px;
-  justify-content: center;
-}
+ 
 
 /* Card Fancy - Stats Cards */
 .card-fancy {
@@ -2067,7 +2085,7 @@ body.modal-open #clubDetailModal {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 20px;
 }
 
 .event-detail-backdrop {
@@ -2080,55 +2098,66 @@ body.modal-open #clubDetailModal {
 
 .event-detail-card {
   position: relative;
-  background: var(--bg-elevated);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  max-width: 600px;
-  width: 100%;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  max-width: 650px;
+  width: 90%;
   max-height: 85vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.1);
   animation: slideUp 0.3s ease-out;
   z-index: 1;
+  padding: 32px;
 }
 
 .event-detail-close {
   position: absolute;
   top: 16px;
   right: 16px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid var(--border-subtle);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--danger);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  color: var(--text-muted);
+  font-size: 28px;
+  line-height: 1;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 10;
 }
 
 .event-detail-close:hover {
-  background: var(--accent);
-  color: white;
-  transform: scale(1.1);
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--danger);
+  transform: rotate(90deg);
 }
 
 .event-detail-header {
-  padding: 24px 24px 16px 24px;
-  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .event-detail-body {
-  padding: 24px;
+  color: var(--text-main);
 }
 
 .event-detail-actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+.event-detail-actions .button-primary,
+.event-detail-actions .button-ghost {
+  flex: 1;
+  min-width: 140px;
   justify-content: center;
 }
 

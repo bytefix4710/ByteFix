@@ -8,8 +8,9 @@
 </head>
 
 <body>
-  <div class="page-root">
-    <div class="app-shell">
+  <div class="page-root" style="padding: 0 !important; max-width: 100% !important;">
+    <div class="app-shell"
+      style="max-width: 100% !important; width: 100% !important; height: 100vh !important; border-radius: 0 !important; border: none !important;">
       <header class="app-header">
         <div class="app-title-block">
           <div class="app-title">
@@ -199,7 +200,7 @@
               </div>
 
               <!-- FİLTRE BAR -->
-<div style="
+              <div style="
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-md);
@@ -212,7 +213,7 @@
   overflow: hidden;
 ">
 
-  <span style="
+                <span style="
     font-size: 16px;
     display: flex;
     align-items: center;
@@ -220,7 +221,7 @@
     flex-shrink: 0;
   ">🔍</span>
 
-  <select id="announcementClubFilter" style="
+                <select id="announcementClubFilter" style="
     height: 36px;
     padding: 0 10px;
     border-radius: var(--radius-md);
@@ -231,10 +232,10 @@
     flex: 1;
     min-width: 120px;
   ">
-    <option value="">🏛️ Tüm Kulüpler</option>
-  </select>
+                  <option value="">🏛️ Tüm Kulüpler</option>
+                </select>
 
-  <input type="date" id="announcementDateFilter" style="
+                <input type="date" id="announcementDateFilter" style="
     height: 36px;
     padding: 0 10px;
     border-radius: var(--radius-md);
@@ -246,7 +247,7 @@
     min-width: 120px;
   " />
 
-  <select id="announcementTypeFilter" style="
+                <select id="announcementTypeFilter" style="
     height: 36px;
     padding: 0 10px;
     border-radius: var(--radius-md);
@@ -257,15 +258,12 @@
     flex: 0.8;
     min-width: 120px;
   ">
-    <option value="all">📢 Tüm Duyurular</option>
-    <option value="system">🌐 Sistem Geneli</option>
-    <option value="club">🏛️ Kulüp Duyuruları</option>
-  </select>
+                  <option value="all">📢 Tüm Duyurular</option>
+                  <option value="system">🌐 Sistem Geneli</option>
+                  <option value="club">🏛️ Kulüp Duyuruları</option>
+                </select>
 
-  <button
-    class="button-ghost"
-    onclick="clearAnnouncementFilters()"
-    style="
+                <button class="button-ghost" onclick="clearAnnouncementFilters()" style="
       height: 36px;
       padding: 0 10px;
       font-size: 12px;
@@ -275,12 +273,11 @@
       border-radius: var(--radius-md);
       white-space: nowrap;
       flex: 0.7;
-    "
-  >
-    🔄 Filtreleri Temizle
-  </button>
+    ">
+                  🔄 Filtreleri Temizle
+                </button>
 
-</div>
+              </div>
 
 
 

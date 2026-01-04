@@ -1,130 +1,117 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>UniClub</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="page-root">
-      <div class="app-shell">
-        <header class="app-header">
-          <div class="app-title-block">
-            <div class="app-title">
-              UniClub
-              <span class="app-title-badge">Giriş</span>
-            </div>
-            <div class="app-subtitle">
-              Devam etmeden önce kullanıcı tipini seç.
-            </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>UniClub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-root" style="padding: 0 !important; max-width: 100% !important;">
+    <div class="app-shell"
+      style="max-width: 100% !important; width: 100% !important; height: 100vh !important; border-radius: 0 !important; border: none !important;">
+      <header class="app-header">
+        <div class="app-title-block">
+          <div class="app-title">
+            UniClub
+            <span class="app-title-badge">Giriş</span>
           </div>
-        </header>
+          <div class="app-subtitle">
+            Devam etmeden önce kullanıcı tipini seç.
+          </div>
+        </div>
+      </header>
 
-        <main class="app-main">
-          
-          <section class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Kulüp Admini</div>
-                <div class="card-subtitle">
-                  Kulüp bilgilerini ve etkinlikleri yöneten kullanıcı.
-                </div>
+      <main class="app-main">
+
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Kulüp Admini</div>
+              <div class="card-subtitle">
+                Kulüp bilgilerini ve etkinlikleri yöneten kullanıcı.
               </div>
-              <span class="chip active-chip">Aktif</span>
             </div>
+            <span class="chip active-chip">Aktif</span>
+          </div>
 
-            <ul class="feature-list">
-              <li>• Kulüp profilini düzenler.</li>
-              <li>• Etkinlikleri yönetir.</li>
-              <li>• Üyeleri görüntüler.</li>
-            </ul>
+          <ul class="feature-list">
+            <li>• Kulüp profilini düzenler.</li>
+            <li>• Etkinlikleri yönetir.</li>
+            <li>• Üyeleri görüntüler.</li>
+          </ul>
 
-            <div class="card-actions">
-              <button
-                class="button-primary full-width"
-                onclick="window.location.href='admin/login.html'"
-              >
-                Giriş Yap
-              </button>
-              <button
-                class="button-ghost full-width"
-                onclick="window.location.href='admin/register.html'"
-              >
-                Kayıt Ol
-              </button>
-            </div>
-          </section>
+          <div class="card-actions">
+            <button class="button-primary full-width" onclick="window.location.href='admin/login.html'">
+              Giriş Yap
+            </button>
+            <button class="button-ghost full-width" onclick="window.location.href='admin/register.html'">
+              Kayıt Ol
+            </button>
+          </div>
+        </section>
 
-          <section class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Süper Admin</div>
-                <div class="card-subtitle">
-                  Sistem genelini yöneten, tüm kulüpleri gören kullanıcı.
-                </div>
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Süper Admin</div>
+              <div class="card-subtitle">
+                Sistem genelini yöneten, tüm kulüpleri gören kullanıcı.
               </div>
-              <span class="chip active-chip">Aktif</span>
             </div>
+            <span class="chip active-chip">Aktif</span>
+          </div>
 
-            <ul class="feature-list">
-              <li>• Tüm kulüpleri görüntüler.</li>
-              <li>• Kulüp adminlerini yönetir.</li>
-              <li>• Sistem ayarlarını düzenler.</li>
-            </ul>
+          <ul class="feature-list">
+            <li>• Tüm kulüpleri görüntüler.</li>
+            <li>• Kulüp adminlerini yönetir.</li>
+            <li>• Sistem ayarlarını düzenler.</li>
+          </ul>
 
-            <div class="card-actions">
-              <button
-                class="button-primary full-width"
-                onclick="window.location.href='super_admin/login.html'"
-              >
-                Giriş Yap
-              </button>
-              <button
-                class="button-ghost full-width"
-                onclick="alert('Süper admin kaydı için sistem yöneticisine başvurun.')"
-              >
-                Kayıt Ol
-              </button>
-            </div>
-          </section>
+          <div class="card-actions">
+            <button class="button-primary full-width" onclick="window.location.href='super_admin/login.html'">
+              Giriş Yap
+            </button>
+            <button class="button-ghost full-width"
+              onclick="alert('Süper admin kaydı için sistem yöneticisine başvurun.')">
+              Kayıt Ol
+            </button>
+          </div>
+        </section>
 
-          <section class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Üye</div>
-                <div class="card-subtitle">
-                  Kulüplere katılan ve etkinliklere kaydolan öğrenci.
-                </div>
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Üye</div>
+              <div class="card-subtitle">
+                Kulüplere katılan ve etkinliklere kaydolan öğrenci.
               </div>
-              <span class="chip active-chip">Aktif</span>
             </div>
+            <span class="chip active-chip">Aktif</span>
+          </div>
 
-            <ul class="feature-list">
-              <li>• Kendi profilini yönetir.</li>
-              <li>• Kulüpleri görüntüler ve başvurur.</li>
-              <li>• Etkinliklere kayıt olur.</li>
-            </ul>
+          <ul class="feature-list">
+            <li>• Kendi profilini yönetir.</li>
+            <li>• Kulüpleri görüntüler ve başvurur.</li>
+            <li>• Etkinliklere kayıt olur.</li>
+          </ul>
 
-            <div class="card-actions">
-              <button
-                class="button-primary full-width"
-                onclick="window.location.href='member/login.html'"
-              >
-                Giriş Yap
-              </button>
-              <button
-                class="button-ghost full-width"
-                onclick="window.location.href='member/register.html'"
-              >
-                Kayıt Ol
-              </button>
-            </div>
-          </section>
+          <div class="card-actions">
+            <button class="button-primary full-width" onclick="window.location.href='member/login.html'">
+              Giriş Yap
+            </button>
+            <button class="button-ghost full-width" onclick="window.location.href='member/register.html'">
+              Kayıt Ol
+            </button>
+          </div>
+        </section>
 
-        </main>
-      </div>
+      </main>
     </div>
+  </div>
 
-    <script src="app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
+
 </html>
