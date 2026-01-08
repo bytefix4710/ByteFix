@@ -1394,10 +1394,10 @@ body.modal-open #clubDetailModal {
   background: rgba(148, 163, 184, 0.3);
 }
 
-/* Events list max height */
-.events-grid {
-  max-height: 280px;
-  overflow-y: auto;
+/* Events sayfada uzasın, kendi içinde scroll yapmasın */
+#page-events .events-grid {
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .events-grid::-webkit-scrollbar {
