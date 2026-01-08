@@ -1,7 +1,10 @@
 # UniClub (Sprint 1 - MVP) 
 
 **Üniversite Kulüp Yönetim Sistemi**
-
+## Contributors
+- Burakhan Saruhan
+- Alihan Uludağ
+- İclal Ertürk
 UniClub, üniversite öğrencilerinin kulüpleri keşfetmesini, kulüp yöneticilerinin topluluklarını yönetmesini ve süper yöneticilerin sistemi denetlemesini sağlayan kapsamlı bir platformdur.
 
 **Kasım 2025** itibarıyla **Sprint 1** tamamlanmış ve **MVP (Minimum Viable Product)** sürümü yayınlanmıştır.
